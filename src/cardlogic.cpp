@@ -6,11 +6,13 @@
 #include <stdlib.h>
 
 CardList::CardList() {
-
 }
 
 CardList::CardList(const CardList& lstCard) {
     cloneWith(lstCard);
+}
+
+CardList::~CardList() {
 }
 
 void CardList::addCard(int rank, int suit) {
@@ -41,7 +43,7 @@ void CardList::clear() {
 }
 
 void CardList::sort() {
-    std::sort(m_lst.begin(), m_lst.end());
+    std::sort(m_lst.begin(), m_lst.end(), greater4sort);
 }
 
 bool CardList::hasRank(int rank) {
@@ -297,4 +299,12 @@ void CardList::shuffle(int nums) {
 
         swap(i0, i1);
     }
+}
+
+int CardList::getCardNums() {
+    return m_lst.size();
+}
+
+CardInfo& CardList::getCard(int index) {
+    return m_lst[index];
 }

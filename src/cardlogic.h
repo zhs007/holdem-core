@@ -89,13 +89,13 @@ struct CardInfo {
     }
 };
 
-bool operator < (const CardInfo& left, const CardInfo& right) {
-    if (left.rank < right.rank) {
+bool greater4sort(const CardInfo& left, const CardInfo& right) {
+    if (left.rank > right.rank) {
         return true;
     }
 
     if (left.rank == right.rank) {
-        if (left.suit < right.suit) {
+        if (left.suit > right.suit) {
             return true;
         }
     }
@@ -109,6 +109,13 @@ class CardList{
 public:
     CardList();
     CardList(const CardList& lstCard);
+    virtual ~CardList();
+public:
+    virtual void clear();
+
+    int getCardNums();
+
+    CardInfo& getCard(int index);
 public:
     void addCard(int rank, int suit);
 
@@ -117,8 +124,6 @@ public:
     void addCardList(CardList& cl);
 
     void cloneWith(const CardList& lstCard);
-
-    void clear();
 
     void sort();
 
