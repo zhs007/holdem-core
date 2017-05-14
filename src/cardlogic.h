@@ -89,4 +89,88 @@ struct CardInfo {
     }
 };
 
+bool operator < (const CardInfo& left, const CardInfo& right) {
+    if (left.rank < right.rank) {
+        return true;
+    }
+
+    if (left.rank == right.rank) {
+        if (left.suit < right.suit) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+class CardList{
+    typedef std::vector<CardInfo>::iterator iterator;
+    typedef std::vector<CardInfo>::const_iterator const_iterator;
+public:
+    CardList();
+    CardList(const CardList& lstCard);
+public:
+    void addCard(int rank, int suit);
+
+    void addCard(CardInfo& ci);
+
+    void addCardList(CardList& cl);
+
+    void cloneWith(const CardList& lstCard);
+
+    void clear();
+
+    void sort();
+
+    bool hasRank(int rank);
+
+    bool hasSuit(int ct);
+
+    bool hasCard(int rank, int suit);
+
+    // 查找同点数相等的牌，譬如4个相等的，返回第一个的索引，如果找不到，返回-1
+    // 这里必须保证牌是从大到小排序后的
+    int _findSameRankNums(int nums);
+
+    // 就是取同点数的牌，如果找到了，会把源队列里面的牌删除掉
+    void _make_SameRankNums(CardList& dest, int nums);
+
+    // 查找花色
+    int make_Suit(CardList& dest, int suit);
+
+    // 查找顺子，返回第一个的索引，如果找不到，返回-1
+    // 这里必须保证牌是从大到小排序，且同点数只有1张
+    int _findStraight(int nums, int& ia);
+
+    // 就是同点数只保留一张，大到小
+    void _make_SingleRank(CardList& dest);
+
+    // 统计在区间内牌的数量
+    // 用于顺子检查，传入应该是同点数仅有一张的序列
+    int _countCardNums_RankIn(int beginrank, int endrank);
+
+    // 统计同点数牌的数量
+    int countCardNums_Rank(int rank);
+
+    // 取这个区间内，差的点数，花色不处理
+    // 用于顺子缺牌的处理，传入应该是同点数仅有一张的序列
+    // 注意：不能处理缺多余2张牌的局面！
+    int _getRank_RankIn(CardInfo& c0, CardInfo& c1, int beginpt, int endpt);
+
+    // 取这个点数里，缺的花色牌
+    // 用于同点数缺牌的情况
+    // 注意：不能处理缺多余2张牌的局面！
+    int _getSuit_Rank(CardInfo& c0, CardInfo& c1, int rank);
+
+    void buildTotalCardList();
+
+    void swap(int i, int j);
+
+    // 洗牌
+    void shuffle(int nums);
+public:
+    std::vector<CardInfo>       m_lst;
+};
+
+
 #endif //HOLDEM_CORE_CARDLOGIC_H
