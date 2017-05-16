@@ -5,6 +5,20 @@
 #include "cardlogic.h"
 #include <stdlib.h>
 
+bool greater4sort(const CardInfo& left, const CardInfo& right) {
+    if (left.rank > right.rank) {
+        return true;
+    }
+
+    if (left.rank == right.rank) {
+        if (left.suit > right.suit) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 CardList::CardList() {
 }
 
