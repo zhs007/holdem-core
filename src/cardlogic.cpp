@@ -29,6 +29,21 @@ CardList::CardList(const CardList& lstCard) {
 CardList::~CardList() {
 }
 
+void CardList::makeStr(std::string& str) {
+    str.clear();
+
+    for (int i = 0; i < (int)m_lst.size(); ++i) {
+        if (i > 0) {
+            str += ",";
+        }
+
+        char strci[3];
+        m_lst[i].makeString(strci);
+
+        str += strci;
+    }
+}
+
 void CardList::addCard(int rank, int suit) {
     CardInfo c(rank, suit);
     m_lst.push_back(c);

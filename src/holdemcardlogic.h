@@ -6,6 +6,7 @@
 #define HOLDEM_CORE_HOLDEMCARDLOGIC_H
 
 #include "cardlogic.h"
+#include <string>
 
 const int HOLDEM_CARDTYPE_HIGHCARD      = 0;    // high card
 const int HOLDEM_CARDTYPE_PAIR          = 1;    // pair
@@ -20,6 +21,8 @@ const int HOLDEM_CARDTYPE_ROYALFLUSH    = 9;    // royal flush
 
 const int MAX_HOLDEM_CARDTYPE           = 10;   // 牌型10种
 
+void makeHoldemCardTypeStr(std::string& str, int hct);
+
 class HoldemCardList : public CardList {
 public:
     HoldemCardList();
@@ -28,6 +31,10 @@ public:
     virtual void clear();
 public:
     int buildWith(CardList& lstHand, CardList& lstCommon);
+
+    int buildWith(CardList& lstCards);
+
+    int getCardType() const { return m_cardtype; }
 protected:
     int     m_cardtype;
 };

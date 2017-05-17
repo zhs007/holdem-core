@@ -59,10 +59,36 @@ const int HS_6[] = {
         HOLDEM_STATION_CO
 };
 
+const int HS_5[] = {
+        HOLDEM_STATION_BUTTON,
+        HOLDEM_STATION_SB,
+        HOLDEM_STATION_BB,
+        HOLDEM_STATION_UTG,
+        HOLDEM_STATION_HJ
+};
+
+const int HS_4[] = {
+        HOLDEM_STATION_BUTTON,
+        HOLDEM_STATION_SB,
+        HOLDEM_STATION_BB,
+        HOLDEM_STATION_UTG
+};
+
+const int HS_3[] = {
+        HOLDEM_STATION_UTG,
+        HOLDEM_STATION_SB,
+        HOLDEM_STATION_BB
+};
+
+const int HS_2[] = {
+        HOLDEM_STATION_BUTTON,
+        HOLDEM_STATION_UTG
+};
+
 // 根据人数、button位，确定index位置
 // index从0开始
 int getHoldemStation(int playernums, int buttonindex, int index) {
-    if (playernums <= 5) {
+    if (playernums <= 1) {
         return -1;
     }
 
@@ -102,5 +128,58 @@ int getHoldemStation(int playernums, int buttonindex, int index) {
         return HS_6[off];
     }
 
+    if (playernums == 5) {
+        return HS_5[off];
+    }
+
+    if (playernums == 4) {
+        return HS_4[off];
+    }
+
+    if (playernums == 3) {
+        return HS_3[off];
+    }
+
+    if (playernums == 2) {
+        return HS_2[off];
+    }
+
     return -1;
+}
+
+void makeHoldemStationStr(std::string& str, int hs) {
+    str.clear();
+
+    switch (hs) {
+        case HOLDEM_STATION_BUTTON:
+            str = "button";
+            break;
+        case HOLDEM_STATION_SB:
+            str = "small blind";
+            break;
+        case HOLDEM_STATION_BB:
+            str = "big blind";
+            break;
+        case HOLDEM_STATION_UTG:
+            str = "under the gun";
+            break;
+        case HOLDEM_STATION_UTG1:
+            str = "UTG1";
+            break;
+        case HOLDEM_STATION_UTG2:
+            str = "UTG2";
+            break;
+        case HOLDEM_STATION_MP1:
+            str = "MP1";
+            break;
+        case HOLDEM_STATION_MP2:
+            str = "MP2";
+            break;
+        case HOLDEM_STATION_HJ:
+            str = "hijack";
+            break;
+        case HOLDEM_STATION_CO:
+            str = "cut off";
+            break;
+    }
 }

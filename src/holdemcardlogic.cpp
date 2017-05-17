@@ -4,6 +4,41 @@
 
 #include "holdemcardlogic.h"
 
+void makeHoldemCardTypeStr(std::string& str, int hct) {
+    switch (hct) {
+        case HOLDEM_CARDTYPE_HIGHCARD:
+            str = "HIGHCARD";
+            break;
+        case HOLDEM_CARDTYPE_PAIR:
+            str = "PAIR";
+            break;
+        case HOLDEM_CARDTYPE_2PAIR:
+            str = "2PAIR";
+            break;
+        case HOLDEM_CARDTYPE_THREE:
+            str = "THREE";
+            break;
+        case HOLDEM_CARDTYPE_STRAIGHT:
+            str = "STRAIGHT";
+            break;
+        case HOLDEM_CARDTYPE_FLUSH:
+            str = "FLUSH";
+            break;
+        case HOLDEM_CARDTYPE_FULLHOUSE:
+            str = "FULLHOUSE";
+            break;
+        case HOLDEM_CARDTYPE_FOUR:
+            str = "FOUR";
+            break;
+        case HOLDEM_CARDTYPE_STRAIGHTFLUSH:
+            str = "STRAIGHTFLUSH";
+            break;
+        case HOLDEM_CARDTYPE_ROYALFLUSH:
+            str = "ROYALFLUSH";
+            break;
+    }
+}
+
 HoldemCardList::HoldemCardList()
         : m_cardtype(HOLDEM_CARDTYPE_HIGHCARD) {
 
@@ -20,11 +55,15 @@ void HoldemCardList::clear() {
 }
 
 int HoldemCardList::buildWith(CardList& lstHand, CardList& lstCommon) {
-    clear();
-
     CardList lstCard;
     lstCard.addCardList(lstHand);
     lstCard.addCardList(lstCommon);
+
+    buildWith(lstCard);
+}
+
+int HoldemCardList::buildWith(CardList& lstCard) {
+    clear();
 
     lstCard.sort();
 

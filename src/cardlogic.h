@@ -7,6 +7,7 @@
 
 #include <cstdint>
 #include <vector>
+#include <string>
 
 const int8_t CARD_SUIT_SPADES   =   0;
 const int8_t CARD_SUIT_HEARTS   =   1;
@@ -104,6 +105,8 @@ public:
     int getCardNums();
 
     CardInfo& getCard(int index);
+
+    void makeStr(std::string& str);
 public:
     void addCard(int rank, int suit);
 

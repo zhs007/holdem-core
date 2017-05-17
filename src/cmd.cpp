@@ -2,8 +2,9 @@
 // Created by zhs007 on 2017/5/16.
 //
 
-#include "cmd.h"
 #include <stdlib.h>
+#include "cmd.h"
+#include "holdemlogic.h"
 
 bool isChar_az09(char c) {
     if (c >= '0' && c <= '9') {
@@ -55,6 +56,52 @@ void procString(std::vector<int>& lstb, std::vector<int>& lste, const char* str)
 void cmd_exit(Command& cmd) {
     printf("cmd_exit\n");
     exit(0);
+}
+
+void cmd_getposition(Command& cmd) {
+    printf("cmd_getposition playernums:%s, buttonindex:%s, myindex:%s\n",
+           cmd.lstParam[0].c_str(), cmd.lstParam[1].c_str(), cmd.lstParam[2].c_str());
+
+    int playernums = atoi(cmd.lstParam[0].c_str());
+    int buttonindex = atoi(cmd.lstParam[1].c_str());
+    int index = atoi(cmd.lstParam[2].c_str());
+
+    int hs = getHoldemStation(playernums, buttonindex, index);
+    std::string hsstr;
+    makeHoldemStationStr(hsstr, hs);
+
+    printf("my station: %s\n", hsstr.c_str());
+}
+
+void cmd_proccards(Command& cmd) {
+    CardList lstcards;
+
+    std::string strp;
+    for (int i = 0; i < cmd.lstParam.size(); ++i) {
+        CardInfo ci;
+
+        if (i > 0) {
+            strp += ",";
+        }
+
+        strp += cmd.lstParam[i];
+
+        ci.setWithStr(cmd.lstParam[i].c_str());
+        lstcards.addCard(ci);
+    }
+
+    printf("cmd_proccard [%s]\n", strp.c_str());
+
+    HoldemCardList hcl;
+    hcl.buildWith(lstcards);
+
+    std::string hctstr;
+    makeHoldemCardTypeStr(hctstr, hcl.getCardType());
+
+    std::string strcl;
+    hcl.makeStr(strcl);
+
+    printf("holdem cardtype: %s[%s]\n", hctstr.c_str(), strcl.c_str());
 }
 
 CommandMgr& CommandMgr::getSingleton() {
@@ -132,6 +179,8 @@ void CommandMgr::getCmd(char* strbuf, int len) {
 
 CommandMgr::CommandMgr() {
     regCommand("exit", cmd_exit);
+    regCommand("hs", cmd_getposition);
+    regCommand("pc", cmd_proccards);
 }
 
 CommandMgr::~CommandMgr() {
