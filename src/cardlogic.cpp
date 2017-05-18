@@ -201,11 +201,21 @@ void CardList::_make_SingleRank(CardList& dest) {
 // 用于顺子检查，传入应该是同点数仅有一张的序列
 int CardList::_countCardNums_RankIn(int beginrank, int endrank) {
     int nums = 0;
+    if (beginrank == CARD_RANK_1) {
+        for (int i = 0; i < m_lst.size(); ++i) {
+            if (m_lst[i].rank >= beginrank && m_lst[i].rank <= endrank) {
+                ++nums;
+            }
+            else if (m_lst[i].rank == CARD_RANK_A) {
+                ++nums;
+            }
+        }
+
+        return nums;
+    }
+
     for (int i = 0; i < m_lst.size(); ++i) {
         if (m_lst[i].rank >= beginrank && m_lst[i].rank <= endrank) {
-            ++nums;
-        }
-        else if (beginrank == CARD_RANK_1 && m_lst[i].rank == CARD_RANK_A) {
             ++nums;
         }
     }
@@ -214,7 +224,7 @@ int CardList::_countCardNums_RankIn(int beginrank, int endrank) {
 }
 
 // 统计同点数牌的数量
-int CardList::countCardNums_Rank(int rank) {
+int CardList::count_Rank(int rank) {
     int nums = 0;
     for (int i = 0; i < m_lst.size(); ++i) {
         if (m_lst[i].rank == rank) {
@@ -336,4 +346,83 @@ int CardList::getCardNums() {
 
 CardInfo& CardList::getCard(int index) {
     return m_lst[index];
+}
+
+// 取点数区间内的所有牌
+void CardList::make_RankIn(CardList& lst, int beginrank, int endrank) {
+    lst.clear();
+
+    if (beginrank == CARD_RANK_1) {
+        for (int i = 0; i < m_lst.size(); ++i) {
+            if (m_lst[i].rank >= beginrank && m_lst[i].rank <= endrank) {
+                lst.addCard(m_lst[i]);
+            }
+            else if (m_lst[i].rank == CARD_RANK_A) {
+                lst.addCard(m_lst[i]);
+            }
+        }
+
+        return ;
+    }
+
+    for (int i = 0; i < m_lst.size(); ++i) {
+        if (m_lst[i].rank >= beginrank && m_lst[i].rank <= endrank) {
+            lst.addCard(m_lst[i]);
+        }
+    }
+}
+
+// 是否有该花色且点数在区间内的牌
+bool CardList::hasSuit_RankIn(int suit, int beginrank, int endrank) {
+    if (beginrank == CARD_RANK_1) {
+        for (int i = 0; i < m_lst.size(); ++i) {
+            if (m_lst[i].suit == suit) {
+                if (m_lst[i].rank >= beginrank && m_lst[i].rank <= endrank) {
+                    return true;
+                }
+
+                if (m_lst[i].rank == CARD_RANK_A) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    for (int i = 0; i < m_lst.size(); ++i) {
+        if (m_lst[i].rank >= beginrank && m_lst[i].rank <= endrank && m_lst[i].suit == suit) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+// 统计该花色且点数在区间内的牌
+int CardList::count_Suit_RankIn(int suit, int beginrank, int endrank) {
+    int nums = 0;
+
+    if (beginrank == CARD_RANK_1) {
+        for (int i = 0; i < m_lst.size(); ++i) {
+            if (m_lst[i].suit == suit) {
+                if (m_lst[i].rank >= beginrank && m_lst[i].rank <= endrank) {
+                    nums++;
+                }
+                else if (m_lst[i].rank == CARD_RANK_A) {
+                    nums++;
+                }
+            }
+        }
+
+        return nums;
+    }
+
+    for (int i = 0; i < m_lst.size(); ++i) {
+        if (m_lst[i].rank >= beginrank && m_lst[i].rank <= endrank && m_lst[i].suit == suit) {
+            nums++;
+        }
+    }
+
+    return nums;
 }

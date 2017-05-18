@@ -39,6 +39,223 @@ void makeHoldemCardTypeStr(std::string& str, int hct) {
     }
 }
 
+//======================================================================================================================
+// 牌型概率
+void HoldemCardTypeProb::clear() {
+    m_numsTotal = 0;
+
+    memset(m_numsCardType, 0, sizeof(int) * MAX_HOLDEM_CARDTYPE);
+}
+
+void HoldemCardTypeProb::addCardTypeNums(int ct, int nums) {
+    m_numsCardType[ct] += nums;
+    m_numsTotal += nums;
+}
+
+void HoldemCardTypeProb::analysisOthers(CardList& lstCards, CardList& lstExclude) {
+    clear();
+
+    int nums = lstCards.getCardNums();
+    if (nums < 3 || nums > 5) {
+        return ;
+    }
+
+    if (nums == 3) {
+        _analysisOthers_3_foreach(lstCards, lstExclude);
+    }
+
+    if (nums == 4) {
+        _analysisOthers_4_foreach(lstCards, lstExclude);
+    }
+
+    if (nums == 5) {
+        _analysisOthers_5_foreach(lstCards, lstExclude);
+    }
+}
+
+void HoldemCardTypeProb::_analysisOthers_3(CardList& lstCards, CardList& lstExclude) {
+    int neednums = 4;
+    int curlastnums = CARD_TOTAL_NUMS - lstCards.getCardNums() - lstExclude.getCardNums();
+    m_numsTotal = countTotalNums(curlastnums, neednums);
+
+    lstCards.sort();
+
+    // HOLDEM_CARDTYPE_ROYALFLUSH
+    // 首先判断皇家同花顺，3张公共牌里，只要出现1张10-A之间的牌就有概率
+    CardList lstTA;
+    lstCards.make_RankIn(lstTA, CARD_RANK_10, CARD_RANK_A);
+    if (lstTA.getCardNums() > 0) {
+        for (int suit = CARD_SUIT_SPADES; suit <= CARD_SUIT_DIAMONDS; ++suit) {
+            CardList lstTAS;
+            lstTA.make_Suit(lstTAS, suit);
+
+            if (lstTAS.getCardNums() > 0) {
+                if (!lstExclude.hasSuit_RankIn(suit, CARD_RANK_10, CARD_RANK_A)) {
+                    int rn = 5 - lstTAS.getCardNums();
+                    int trn = neednums - rn;
+                    if (trn == 0) {
+                        m_numsCardType[HOLDEM_CARDTYPE_ROYALFLUSH]++;
+                    }
+                    else if (trn > 0) {
+                        m_numsCardType[HOLDEM_CARDTYPE_ROYALFLUSH] += countTotalNums(curlastnums - rn, trn);
+                    }
+                }
+            }
+        }
+    }
+
+    // HOLDEM_CARDTYPE_STRAIGHTFLUSH
+    // 同花顺，算法几乎一样
+    for (int rank = CARD_RANK_1; rank < CARD_RANK_10; ++rank) {
+        for (int suit = CARD_SUIT_SPADES; suit <= CARD_SUIT_DIAMONDS; ++suit) {
+            int cn = lstCards.count_Suit_RankIn(suit, rank, rank + 4);
+            if (cn > 0) {
+                if (!lstExclude.hasSuit_RankIn(suit, CARD_RANK_10, CARD_RANK_A)) {
+                    int rn = 5 - cn;
+                    int trn = neednums - rn;
+                    if (trn == 0) {
+                        m_numsCardType[HOLDEM_CARDTYPE_STRAIGHTFLUSH]++;
+                    }
+                    else if (trn > 0) {
+                        m_numsCardType[HOLDEM_CARDTYPE_STRAIGHTFLUSH] += countTotalNums(curlastnums - rn, trn);
+                    }
+                }
+            }
+        }
+    }
+
+    // HOLDEM_CARDTYPE_FOUR
+    // 4张，只要没有排除的牌都可能出
+    for (int rank = CARD_RANK_2; rank < CARD_RANK_A; ++rank) {
+        if (!lstExclude.hasRank(rank)) {
+            int cn = lstCards.count_Rank(rank);
+            int rn = 4 - cn;
+            int trn = neednums - rn;
+            if (cn == 0) {
+                m_numsCardType[HOLDEM_CARDTYPE_FOUR]++;
+            }
+            else {
+                m_numsCardType[HOLDEM_CARDTYPE_STRAIGHTFLUSH] += countTotalNums(curlastnums - rn, trn);
+            }
+        }
+    }
+
+    // HOLDEM_CARDTYPE_FULLHOUSE
+    // 葫芦
+}
+
+int HoldemCardTypeProb::countTotalNums(int totalnums, int neednums) {
+    int64_t n = 1;
+    for (int i = 0; i < neednums; ++i) {
+        n *= (totalnums - i);
+    }
+
+    for (int i = 0; i < neednums; ++i) {
+        n /= (neednums - i);
+    }
+
+    return n;
+}
+
+void HoldemCardTypeProb::_analysisOthers_3_foreach(CardList& lstCards, CardList& lstExclude) {
+    CardList lst;
+
+    for (int suit = CARD_SUIT_SPADES; suit <= CARD_SUIT_DIAMONDS; ++suit) {
+        for (int rank = CARD_RANK_2; rank <= CARD_RANK_A; ++rank) {
+            if (!lstCards.hasCard(rank, suit) && !lstExclude.hasCard(rank, suit)) {
+                lst.addCard(rank, suit);
+            }
+        }
+    }
+
+    for (int i0 = 0; i0 < lst.getCardNums() - 3; ++i0) {
+        for (int i1 = i0 + 1; i1 < lst.getCardNums() - 2; ++i1) {
+            for (int i2 = i1 + 1; i2 < lst.getCardNums() - 1; ++i2) {
+                for (int i3 = i2 + 1; i3 < lst.getCardNums(); ++i3) {
+                    CardList lstguess;
+
+                    lstguess.addCard(lst.getCard(i0));
+                    lstguess.addCard(lst.getCard(i1));
+                    lstguess.addCard(lst.getCard(i2));
+                    lstguess.addCard(lst.getCard(i3));
+
+                    HoldemCardList hcl;
+                    hcl.buildWith(lstCards, lstguess);
+
+                    addCardTypeNums(hcl.getCardType(), 1);
+                }
+            }
+        }
+    }
+}
+
+void HoldemCardTypeProb::_analysisOthers_4_foreach(CardList& lstCards, CardList& lstExclude) {
+    CardList lst;
+
+    for (int suit = CARD_SUIT_SPADES; suit <= CARD_SUIT_DIAMONDS; ++suit) {
+        for (int rank = CARD_RANK_2; rank <= CARD_RANK_A; ++rank) {
+            if (!lstCards.hasCard(rank, suit) && !lstExclude.hasCard(rank, suit)) {
+                lst.addCard(rank, suit);
+            }
+        }
+    }
+
+    for (int i0 = 0; i0 < lst.getCardNums() - 2; ++i0) {
+        for (int i1 = i0 + 1; i1 < lst.getCardNums() - 1; ++i1) {
+            for (int i2 = i1 + 1; i2 < lst.getCardNums(); ++i2) {
+                CardList lstguess;
+
+                lstguess.addCard(lst.getCard(i0));
+                lstguess.addCard(lst.getCard(i1));
+                lstguess.addCard(lst.getCard(i2));
+
+                HoldemCardList hcl;
+                hcl.buildWith(lstCards, lstguess);
+
+                addCardTypeNums(hcl.getCardType(), 1);
+            }
+        }
+    }
+}
+
+void HoldemCardTypeProb::_analysisOthers_5_foreach(CardList& lstCards, CardList& lstExclude) {
+    CardList lst;
+
+    for (int suit = CARD_SUIT_SPADES; suit <= CARD_SUIT_DIAMONDS; ++suit) {
+        for (int rank = CARD_RANK_2; rank <= CARD_RANK_A; ++rank) {
+            if (!lstCards.hasCard(rank, suit) && !lstExclude.hasCard(rank, suit)) {
+                lst.addCard(rank, suit);
+            }
+        }
+    }
+
+    for (int i0 = 0; i0 < lst.getCardNums() - 1; ++i0) {
+        for (int i1 = i0 + 1; i1 < lst.getCardNums(); ++i1) {
+            CardList lstguess;
+
+            lstguess.addCard(lst.getCard(i0));
+            lstguess.addCard(lst.getCard(i1));
+
+            HoldemCardList hcl;
+            hcl.buildWith(lstCards, lstguess);
+
+            addCardTypeNums(hcl.getCardType(), 1);
+        }
+    }
+}
+
+void HoldemCardTypeProb::output() {
+    for (int i = HOLDEM_CARDTYPE_ROYALFLUSH; i >= HOLDEM_CARDTYPE_HIGHCARD; --i) {
+        if (m_numsCardType[i] > 0) {
+            std::string strct;
+            makeHoldemCardTypeStr(strct, i);
+            printf("%s - %.2f(%d/%d)\n", strct.c_str(), 100.0f * m_numsCardType[i] / m_numsTotal, m_numsCardType[i], m_numsTotal);
+        }
+    }
+}
+
+//======================================================================================================================
+// 德州牌
 HoldemCardList::HoldemCardList()
         : m_cardtype(HOLDEM_CARDTYPE_HIGHCARD) {
 
@@ -59,7 +276,7 @@ int HoldemCardList::buildWith(CardList& lstHand, CardList& lstCommon) {
     lstCard.addCardList(lstHand);
     lstCard.addCardList(lstCommon);
 
-    buildWith(lstCard);
+    return buildWith(lstCard);
 }
 
 int HoldemCardList::buildWith(CardList& lstCard) {

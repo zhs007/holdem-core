@@ -104,6 +104,95 @@ void cmd_proccards(Command& cmd) {
     printf("holdem cardtype: %s[%s]\n", hctstr.c_str(), strcl.c_str());
 }
 
+void cmd_analysiscards(Command& cmd) {
+    CardList lstcards;
+    CardList lstcards1;
+
+    std::string strp;
+    for (int i = 0; i < cmd.lstParam.size(); ++i) {
+        CardInfo ci;
+
+        if (i > 0) {
+            strp += ",";
+        }
+
+        strp += cmd.lstParam[i];
+
+        ci.setWithStr(cmd.lstParam[i].c_str());
+        lstcards.addCard(ci);
+    }
+
+    printf("cmd_analysiscards [%s]\n", strp.c_str());
+
+    HoldemCardTypeProb prob;
+
+    prob.analysisOthers(lstcards, lstcards1);
+    prob.output();
+}
+
+void cmd_analysiscardsex(Command& cmd) {
+    CardList lstHand;
+    CardList lstCommon;
+
+    std::string strp;
+    for (int i = 0; i < cmd.lstParam.size(); ++i) {
+        CardInfo ci;
+
+        if (i > 0) {
+            strp += ",";
+        }
+
+        strp += cmd.lstParam[i];
+
+        ci.setWithStr(cmd.lstParam[i].c_str());
+
+        if (i < 2) {
+            lstHand.addCard(ci);
+        }
+        else {
+            lstCommon.addCard(ci);
+        }
+    }
+
+    printf("cmd_analysiscardsex [%s]\n", strp.c_str());
+
+    HoldemCardList hcl;
+    hcl.buildWith(lstHand, lstCommon);
+    std::string hctstr;
+    makeHoldemCardTypeStr(hctstr, hcl.getCardType());
+    std::string strcl;
+    hcl.makeStr(strcl);
+    printf("my cardtype: %s[%s]\n", hctstr.c_str(), strcl.c_str());
+
+    HoldemCardTypeProb prob;
+    prob.analysisOthers(lstCommon, lstHand);
+    prob.output();
+}
+
+void cmd_procrange(Command& cmd) {
+    CardList lstHand;
+
+    std::string strp;
+    for (int i = 0; i < cmd.lstParam.size(); ++i) {
+        CardInfo ci;
+
+        if (i > 0) {
+            strp += ",";
+        }
+
+        strp += cmd.lstParam[i];
+
+        ci.setWithStr(cmd.lstParam[i].c_str());
+
+        lstHand.addCard(ci);
+    }
+
+    printf("cmd_procrange [%s]\n", strp.c_str());
+
+    int range = countRange(lstHand);
+    printf("my range: %d\n", range);
+}
+
 CommandMgr& CommandMgr::getSingleton() {
     static CommandMgr s_mgr;
 
@@ -181,6 +270,9 @@ CommandMgr::CommandMgr() {
     regCommand("exit", cmd_exit);
     regCommand("hs", cmd_getposition);
     regCommand("pc", cmd_proccards);
+    regCommand("ac", cmd_analysiscards);
+    regCommand("acex", cmd_analysiscardsex);
+    regCommand("pr", cmd_procrange);
 }
 
 CommandMgr::~CommandMgr() {

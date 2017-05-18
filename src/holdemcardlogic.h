@@ -23,6 +23,35 @@ const int MAX_HOLDEM_CARDTYPE           = 10;   // 牌型10种
 
 void makeHoldemCardTypeStr(std::string& str, int hct);
 
+//======================================================================================================================
+// 牌型概率
+class HoldemCardTypeProb {
+public:
+    HoldemCardTypeProb() { clear(); }
+    ~HoldemCardTypeProb() {}
+public:
+    void analysisOthers(CardList& lstCards, CardList& lstExclude);
+public:
+    void clear();
+
+    void addCardTypeNums(int ct, int nums);
+
+    void output();
+protected:
+    void _analysisOthers_3_foreach(CardList& lstCards, CardList& lstExclude);
+    void _analysisOthers_4_foreach(CardList& lstCards, CardList& lstExclude);
+    void _analysisOthers_5_foreach(CardList& lstCards, CardList& lstExclude);
+
+    void _analysisOthers_3(CardList& lstCards, CardList& lstExclude);
+
+    int countTotalNums(int totalnums, int neednums);
+protected:
+    int m_numsCardType[MAX_HOLDEM_CARDTYPE];
+    int m_numsTotal;
+};
+
+//======================================================================================================================
+// 德州牌
 class HoldemCardList : public CardList {
 public:
     HoldemCardList();

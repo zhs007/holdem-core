@@ -123,16 +123,26 @@ public:
     bool hasSuit(int ct);
 
     bool hasCard(int rank, int suit);
+public:
+    // 取点数区间内的所有牌
+    void make_RankIn(CardList& lst, int beginrank, int endrank);
+    // 查找花色
+    int make_Suit(CardList& dest, int suit);
 
+    // 是否有该花色且点数在区间内的牌
+    bool hasSuit_RankIn(int suit, int beginrank, int endrank);
+
+    // 统计该花色且点数在区间内的牌
+    int count_Suit_RankIn(int suit, int beginrank, int endrank);
+    // 统计同点数牌的数量
+    int count_Rank(int rank);
+public:
     // 查找同点数相等的牌，譬如4个相等的，返回第一个的索引，如果找不到，返回-1
     // 这里必须保证牌是从大到小排序后的
     int _findSameRankNums(int nums);
 
     // 就是取同点数的牌，如果找到了，会把源队列里面的牌删除掉
     void _make_SameRankNums(CardList& dest, int nums);
-
-    // 查找花色
-    int make_Suit(CardList& dest, int suit);
 
     // 查找顺子，返回第一个的索引，如果找不到，返回-1
     // 这里必须保证牌是从大到小排序，且同点数只有1张
@@ -144,9 +154,6 @@ public:
     // 统计在区间内牌的数量
     // 用于顺子检查，传入应该是同点数仅有一张的序列
     int _countCardNums_RankIn(int beginrank, int endrank);
-
-    // 统计同点数牌的数量
-    int countCardNums_Rank(int rank);
 
     // 取这个区间内，差的点数，花色不处理
     // 用于顺子缺牌的处理，传入应该是同点数仅有一张的序列
