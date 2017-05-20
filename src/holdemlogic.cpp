@@ -427,3 +427,106 @@ int countRange(CardList& lstHand) {
 
     return 10;
 }
+
+//======================================================================================================================
+// HoldemLogic
+
+HoldemLogic::HoldemLogic() {
+    clear();
+}
+
+HoldemLogic::~HoldemLogic() {
+
+}
+
+void HoldemLogic::clear() {
+    m_lstCtrl.clear();
+    m_lstPlayer.clear();
+
+    m_totalPool = 0;
+    m_curplayer = -1;
+
+    m_ante = -1;         // 如果-1表示没有ante
+    m_straddle = -1;     // 如果-1表示没有straddle
+
+    m_button = -1;
+
+    m_curBet = 0;
+}
+
+void HoldemLogic::start(int ante, int sb, int bb, int straddle, int playernums, int button) {
+    clear();
+
+    m_ante = ante;
+    m_straddle = straddle;
+    m_sb = sb;
+    m_bb = bb;
+
+    m_button = button;
+
+    for (int i = 0; i < playernums; ++i) {
+        HoldemPlayer hp;
+
+        hp.station = i;
+
+        m_lstPlayer.push_back(hp);
+    }
+
+    if (ante > 0) {
+        m_totalPool += playernums * ante;
+    }
+
+    int sbp = nextPlayer(m_button);
+    playerBet(sbp, sb);
+
+    int bbp = nextPlayer(m_button);
+    playerBet(bbp, bb);
+
+    if (straddle > 0) {
+        int sp = nextPlayer(m_button);
+        playerBet(sp, straddle);
+    }
+}
+
+int HoldemLogic::nextPlayer(int curstation) {
+    if (curstation >= m_lstPlayer.size() - 1) {
+        for (int i = 0; i < curstation; ++i) {
+            if (!m_lstPlayer[i].isFold && !m_lstPlayer[i].isAllIn) {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
+    for (int i = curstation + 1; i < m_lstPlayer.size(); ++i) {
+        if (!m_lstPlayer[i].isFold && !m_lstPlayer[i].isAllIn) {
+            return i;
+        }
+    }
+
+    for (int i = 0; i < curstation; ++i) {
+        if (!m_lstPlayer[i].isFold && !m_lstPlayer[i].isAllIn) {
+            return i;
+        }
+    }
+
+    return -1;
+}
+
+void HoldemLogic::playerBet(int station, int bet) {
+    m_lstPlayer[station].bet_turn += bet;
+    m_totalPool += bet;
+
+    if (m_curBet < m_lstPlayer[station].bet_turn) {
+        m_curBet = m_lstPlayer[station].bet_turn;
+    }
+}
+
+void HoldemLogic::newTurn() {
+    for (int i = 0; i < m_lstPlayer.size(); ++i) {
+        m_lstPlayer[i].bet_turn = 0;
+    }
+
+    m_curBet = 0;
+}

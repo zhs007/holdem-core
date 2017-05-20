@@ -28,4 +28,97 @@ int getHoldemStation(int playernums, int buttonindex, int index);
 // 获取手牌range
 int countRange(CardList& lstHand);
 
+//======================================================================================================================
+// ctrl
+
+const int HOLDEM_CTRL_NULL          =   0;  // null
+const int HOLDEM_CTRL_ANTE          =   1;  // ante
+const int HOLDEM_CTRL_SB            =   2;  // sb
+const int HOLDEM_CTRL_BB            =   3;  // bb
+const int HOLDEM_CTRL_STRADDLE      =   4;  // straddle
+const int HOLDEM_CTRL_FOLD          =   4;  // fold
+const int HOLDEM_CTRL_CALL          =   5;  // call
+const int HOLDEM_CTRL_CHECK         =   6;  // check
+const int HOLDEM_CTRL_RAISE         =   7;  // raise
+const int HOLDEM_CTRL_ALLIN         =   8;  // all in
+const int HOLDEM_CTRL_FLOP          =   9;  // flop
+const int HOLDEM_CTRL_TURN          =   10;  // turn
+const int HOLDEM_CTRL_RIVER         =   11;  // river
+const int HOLDEM_CTRL_RESULT        =   12;  // result
+
+//======================================================================================================================
+// HoldemCtrl
+
+struct HoldemCtrl {
+    int         player;
+    int         ctrlid;
+    CardList    lstCard;
+    int         money;
+
+    HoldemCtrl()
+            : player(-1)
+            , ctrlid(HOLDEM_CTRL_NULL)
+            , money(0) {
+
+    }
+};
+
+//======================================================================================================================
+// HoldemUserInfo
+
+struct HoldemPlayer {
+    int         station;
+    CardList    lstCard;
+    int         money;
+
+    int         bet_turn;
+
+    bool        isFold;
+    bool        isAllIn;
+
+    HoldemPlayer()
+            : station(-1)
+            , money(0)
+            , bet_turn(0)
+            , isFold(false)
+            , isAllIn(false) {
+
+    }
+};
+
+//======================================================================================================================
+// HoldemLogic
+
+class HoldemLogic {
+public:
+    HoldemLogic();
+    ~HoldemLogic();
+public:
+    void clear();
+
+    void start(int ante, int sb, int bb, int straddle, int playernums, int button);
+public:
+    int nextPlayer(int curstation);
+
+    void playerBet(int station, int bet);
+
+    void newTurn();
+protected:
+    std::vector<HoldemCtrl> m_lstCtrl;
+    std::vector<HoldemPlayer> m_lstPlayer;
+
+    int                     m_totalPool;
+    int                     m_curplayer;
+
+    int                     m_ante;         // 如果-1表示没有ante
+    int                     m_straddle;     // 如果-1表示没有straddle
+
+    int                     m_sb;           // sb
+    int                     m_bb;           // bb
+
+    int                     m_button;
+
+    int                     m_curBet;       // 当前最大下注
+};
+
 #endif //HOLDEM_CORE_HOLDEMLOGIC_H
