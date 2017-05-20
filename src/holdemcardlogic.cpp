@@ -52,7 +52,7 @@ void HoldemCardTypeProb::addCardTypeNums(int ct, int nums) {
     m_numsTotal += nums;
 }
 
-void HoldemCardTypeProb::analysisOthers(CardList& lstCards, CardList& lstExclude) {
+void HoldemCardTypeProb::analysisFullOthers(CardList& lstCards, CardList& lstExclude) {
     clear();
 
     int nums = lstCards.getCardNums();
@@ -61,15 +61,15 @@ void HoldemCardTypeProb::analysisOthers(CardList& lstCards, CardList& lstExclude
     }
 
     if (nums == 3) {
-        _analysisOthers_3_foreach(lstCards, lstExclude);
+        _analysisFullOthers_3_foreach(lstCards, lstExclude);
     }
 
     if (nums == 4) {
-        _analysisOthers_4_foreach(lstCards, lstExclude);
+        _analysisFullOthers_4_foreach(lstCards, lstExclude);
     }
 
     if (nums == 5) {
-        _analysisOthers_5_foreach(lstCards, lstExclude);
+        _analysisFullOthers_5_foreach(lstCards, lstExclude);
     }
 }
 
@@ -157,7 +157,7 @@ int HoldemCardTypeProb::countTotalNums(int totalnums, int neednums) {
     return n;
 }
 
-void HoldemCardTypeProb::_analysisOthers_3_foreach(CardList& lstCards, CardList& lstExclude) {
+void HoldemCardTypeProb::_analysisFullOthers_3_foreach(CardList& lstCards, CardList& lstExclude) {
     CardList lst;
 
     for (int suit = CARD_SUIT_SPADES; suit <= CARD_SUIT_DIAMONDS; ++suit) {
@@ -189,7 +189,7 @@ void HoldemCardTypeProb::_analysisOthers_3_foreach(CardList& lstCards, CardList&
     }
 }
 
-void HoldemCardTypeProb::_analysisOthers_4_foreach(CardList& lstCards, CardList& lstExclude) {
+void HoldemCardTypeProb::_analysisFullOthers_4_foreach(CardList& lstCards, CardList& lstExclude) {
     CardList lst;
 
     for (int suit = CARD_SUIT_SPADES; suit <= CARD_SUIT_DIAMONDS; ++suit) {
@@ -218,7 +218,7 @@ void HoldemCardTypeProb::_analysisOthers_4_foreach(CardList& lstCards, CardList&
     }
 }
 
-void HoldemCardTypeProb::_analysisOthers_5_foreach(CardList& lstCards, CardList& lstExclude) {
+void HoldemCardTypeProb::_analysisFullOthers_5_foreach(CardList& lstCards, CardList& lstExclude) {
     CardList lst;
 
     for (int suit = CARD_SUIT_SPADES; suit <= CARD_SUIT_DIAMONDS; ++suit) {
@@ -254,6 +254,195 @@ void HoldemCardTypeProb::output() {
     }
 }
 
+void HoldemCardTypeProb::analysisMe(CardList& lstHand, CardList& lstCommon, CardList& lstExclude) {
+    clear();
+
+    int nums = lstCommon.getCardNums();
+    if (nums < 3 || nums >= 5) {
+        return ;
+    }
+
+    CardList lstCards;
+    lstCards.addCardList(lstHand);
+    lstCards.addCardList(lstCommon);
+
+    if (nums == 3) {
+        _analysisMe_3_foreach(lstCards, lstExclude);
+    }
+
+    if (nums == 4) {
+        _analysisMe_4_foreach(lstCards, lstExclude);
+    }
+}
+
+void HoldemCardTypeProb::_analysisMe_3_foreach(CardList& lstCards, CardList& lstExclude) {
+    CardList lst;
+
+    for (int suit = CARD_SUIT_SPADES; suit <= CARD_SUIT_DIAMONDS; ++suit) {
+        for (int rank = CARD_RANK_2; rank <= CARD_RANK_A; ++rank) {
+            if (!lstCards.hasCard(rank, suit) && !lstExclude.hasCard(rank, suit)) {
+                lst.addCard(rank, suit);
+            }
+        }
+    }
+
+    for (int i0 = 0; i0 < lst.getCardNums() - 1; ++i0) {
+        CardList lstguess;
+
+        lstguess.addCard(lst.getCard(i0));
+
+        HoldemCardList hcl;
+        hcl.buildWith(lstCards, lstguess);
+
+        addCardTypeNums(hcl.getCardType(), 1);
+    }
+}
+
+void HoldemCardTypeProb::_analysisMe_4_foreach(CardList& lstCards, CardList& lstExclude) {
+    CardList lst;
+
+    for (int suit = CARD_SUIT_SPADES; suit <= CARD_SUIT_DIAMONDS; ++suit) {
+        for (int rank = CARD_RANK_2; rank <= CARD_RANK_A; ++rank) {
+            if (!lstCards.hasCard(rank, suit) && !lstExclude.hasCard(rank, suit)) {
+                lst.addCard(rank, suit);
+            }
+        }
+    }
+
+    for (int i0 = 0; i0 < lst.getCardNums() - 1; ++i0) {
+        CardList lstguess;
+
+        lstguess.addCard(lst.getCard(i0));
+
+        HoldemCardList hcl;
+        hcl.buildWith(lstCards, lstguess);
+
+        addCardTypeNums(hcl.getCardType(), 1);
+    }
+}
+
+int HoldemCardTypeProb::analysisOthers(CardList& lstCards, CardList& lstExclude, HoldemCardList& lstMine) {
+    clear();
+
+    int nums = lstCards.getCardNums();
+    if (nums < 3 || nums > 5) {
+        return 0;
+    }
+
+    if (nums == 3) {
+        return _analysisOthers_3_foreach(lstCards, lstExclude, lstMine);
+    }
+
+    if (nums == 4) {
+        return _analysisOthers_4_foreach(lstCards, lstExclude, lstMine);
+    }
+
+    if (nums == 5) {
+        return _analysisOthers_5_foreach(lstCards, lstExclude, lstMine);
+    }
+
+    return 0;
+}
+
+int HoldemCardTypeProb::_analysisOthers_3_foreach(CardList& lstCards, CardList& lstExclude, HoldemCardList& lstMine) {
+    CardList lst;
+
+    for (int suit = CARD_SUIT_SPADES; suit <= CARD_SUIT_DIAMONDS; ++suit) {
+        for (int rank = CARD_RANK_2; rank <= CARD_RANK_A; ++rank) {
+            if (!lstCards.hasCard(rank, suit) && !lstExclude.hasCard(rank, suit)) {
+                lst.addCard(rank, suit);
+            }
+        }
+    }
+
+    int winnums = 0;
+    for (int i0 = 0; i0 < lst.getCardNums() - 3; ++i0) {
+        for (int i1 = i0 + 1; i1 < lst.getCardNums() - 2; ++i1) {
+            CardList lstguess;
+
+            lstguess.addCard(lst.getCard(i0));
+            lstguess.addCard(lst.getCard(i1));
+
+            HoldemCardList hcl;
+            hcl.buildWith(lstCards, lstguess);
+
+            addCardTypeNums(hcl.getCardType(), 1);
+
+            if (hcl.cmp(lstMine) > 0) {
+                winnums++;
+            }
+        }
+    }
+
+    return winnums;
+}
+
+int HoldemCardTypeProb::_analysisOthers_4_foreach(CardList& lstCards, CardList& lstExclude, HoldemCardList& lstMine) {
+    CardList lst;
+
+    for (int suit = CARD_SUIT_SPADES; suit <= CARD_SUIT_DIAMONDS; ++suit) {
+        for (int rank = CARD_RANK_2; rank <= CARD_RANK_A; ++rank) {
+            if (!lstCards.hasCard(rank, suit) && !lstExclude.hasCard(rank, suit)) {
+                lst.addCard(rank, suit);
+            }
+        }
+    }
+
+    int winnums = 0;
+    for (int i0 = 0; i0 < lst.getCardNums() - 3; ++i0) {
+        for (int i1 = i0 + 1; i1 < lst.getCardNums() - 2; ++i1) {
+            CardList lstguess;
+
+            lstguess.addCard(lst.getCard(i0));
+            lstguess.addCard(lst.getCard(i1));
+
+            HoldemCardList hcl;
+            hcl.buildWith(lstCards, lstguess);
+
+            addCardTypeNums(hcl.getCardType(), 1);
+
+            if (hcl.cmp(lstMine) > 0) {
+                winnums++;
+            }
+        }
+    }
+
+    return winnums;
+}
+
+int HoldemCardTypeProb::_analysisOthers_5_foreach(CardList& lstCards, CardList& lstExclude, HoldemCardList& lstMine) {
+    CardList lst;
+
+    for (int suit = CARD_SUIT_SPADES; suit <= CARD_SUIT_DIAMONDS; ++suit) {
+        for (int rank = CARD_RANK_2; rank <= CARD_RANK_A; ++rank) {
+            if (!lstCards.hasCard(rank, suit) && !lstExclude.hasCard(rank, suit)) {
+                lst.addCard(rank, suit);
+            }
+        }
+    }
+
+    int winnums = 0;
+    for (int i0 = 0; i0 < lst.getCardNums() - 3; ++i0) {
+        for (int i1 = i0 + 1; i1 < lst.getCardNums() - 2; ++i1) {
+            CardList lstguess;
+
+            lstguess.addCard(lst.getCard(i0));
+            lstguess.addCard(lst.getCard(i1));
+
+            HoldemCardList hcl;
+            hcl.buildWith(lstCards, lstguess);
+
+            addCardTypeNums(hcl.getCardType(), 1);
+
+            if (hcl.cmp(lstMine) > 0) {
+                winnums++;
+            }
+        }
+    }
+
+    return winnums;
+}
+
 //======================================================================================================================
 // 德州牌
 HoldemCardList::HoldemCardList()
@@ -266,7 +455,7 @@ HoldemCardList::~HoldemCardList() {
 }
 
 void HoldemCardList::clear() {
-    m_cardtype = HOLDEM_CARDTYPE_HIGHCARD;
+    m_cardtype = -1;
 
     CardList::clear();
 }
@@ -501,4 +690,138 @@ int HoldemCardList::buildWith(CardList& lstCard) {
     addCard(lstPtEqu.getCard(4));
 
     return m_cardtype;
+}
+
+int HoldemCardList::cmp(HoldemCardList& right) const {
+    if (m_cardtype > right.m_cardtype) {
+        return 1;
+    }
+    else if (m_cardtype < right.m_cardtype) {
+        return -1;
+    }
+    else {
+        if (m_cardtype == HOLDEM_CARDTYPE_ROYALFLUSH) {
+            return 0;
+        }
+        else if (m_cardtype == HOLDEM_CARDTYPE_STRAIGHTFLUSH || m_cardtype == HOLDEM_CARDTYPE_STRAIGHT) {
+            if (m_lst[0].rank > right.m_lst[0].rank) {
+                return 1;
+            }
+            else if (m_lst[0].rank < right.m_lst[0].rank) {
+                return -1;
+            }
+
+            return 0;
+        }
+        else if (m_cardtype == HOLDEM_CARDTYPE_FOUR) {
+            if (m_lst[0].rank > right.m_lst[0].rank) {
+                return 1;
+            }
+            else if (m_lst[0].rank < right.m_lst[0].rank) {
+                return -1;
+            }
+
+            if (m_lst[4].rank > right.m_lst[4].rank) {
+                return 1;
+            }
+            else if (m_lst[4].rank < right.m_lst[4].rank) {
+                return -1;
+            }
+
+            return 0;
+        }
+        else if (m_cardtype == HOLDEM_CARDTYPE_FULLHOUSE) {
+            if (m_lst[0].rank > right.m_lst[0].rank) {
+                return 1;
+            }
+            else if (m_lst[0].rank < right.m_lst[0].rank) {
+                return -1;
+            }
+
+            if (m_lst[3].rank > right.m_lst[3].rank) {
+                return 1;
+            }
+            else if (m_lst[3].rank < right.m_lst[3].rank) {
+                return -1;
+            }
+
+            return 0;
+        }
+        else if (m_cardtype == HOLDEM_CARDTYPE_FLUSH || m_cardtype == HOLDEM_CARDTYPE_HIGHCARD) {
+            for (int ii = 0; ii < 5; ++ii) {
+                if (m_lst[ii].rank > right.m_lst[ii].rank) {
+                    return 1;
+                }
+                else if (m_lst[ii].rank < right.m_lst[ii].rank) {
+                    return -1;
+                }
+            }
+
+            return 0;
+        }
+        else if (m_cardtype == HOLDEM_CARDTYPE_THREE) {
+            if (m_lst[0].rank > right.m_lst[0].rank) {
+                return 1;
+            }
+            else if (m_lst[0].rank < right.m_lst[0].rank) {
+                return -1;
+            }
+
+            for (int ii = 3; ii < 5; ++ii) {
+                if (m_lst[ii].rank > right.m_lst[ii].rank) {
+                    return 1;
+                }
+                else if (m_lst[ii].rank < right.m_lst[ii].rank) {
+                    return -1;
+                }
+            }
+
+            return 0;
+        }
+        else if (m_cardtype == HOLDEM_CARDTYPE_2PAIR) {
+            if (m_lst[0].rank > right.m_lst[0].rank) {
+                return 1;
+            }
+            else if (m_lst[0].rank < right.m_lst[0].rank) {
+                return -1;
+            }
+
+            if (m_lst[2].rank > right.m_lst[2].rank) {
+                return 1;
+            }
+            else if (m_lst[2].rank < right.m_lst[2].rank) {
+                return -1;
+            }
+
+            if (m_lst[4].rank > right.m_lst[4].rank) {
+                return 1;
+            }
+            else if (m_lst[4].rank < right.m_lst[4].rank) {
+                return -1;
+            }
+
+            return 0;
+        }
+        else if (m_cardtype == HOLDEM_CARDTYPE_PAIR) {
+            if (m_lst[0].rank > right.m_lst[0].rank) {
+                return 1;
+            }
+            else if (m_lst[0].rank < right.m_lst[0].rank) {
+                return -1;
+            }
+
+            for (int ii = 2; ii < 5; ++ii) {
+                if (m_lst[ii].rank > right.m_lst[ii].rank) {
+                    return 1;
+                }
+                else if (m_lst[ii].rank < right.m_lst[ii].rank) {
+                    return -1;
+                }
+            }
+
+            return 0;
+        }
+
+        return 0;
+    }
 }

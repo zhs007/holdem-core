@@ -125,14 +125,16 @@ void cmd_analysiscards(Command& cmd) {
     printf("cmd_analysiscards [%s]\n", strp.c_str());
 
     HoldemCardTypeProb prob;
+    HoldemCardList hcl;
 
-    prob.analysisOthers(lstcards, lstcards1);
+    prob.analysisOthers(lstcards, lstcards1, hcl);
     prob.output();
 }
 
 void cmd_analysiscardsex(Command& cmd) {
     CardList lstHand;
     CardList lstCommon;
+    CardList lstExclude;
 
     std::string strp;
     for (int i = 0; i < cmd.lstParam.size(); ++i) {
@@ -164,9 +166,21 @@ void cmd_analysiscardsex(Command& cmd) {
     hcl.makeStr(strcl);
     printf("my cardtype: %s[%s]\n", hctstr.c_str(), strcl.c_str());
 
-    HoldemCardTypeProb prob;
-    prob.analysisOthers(lstCommon, lstHand);
-    prob.output();
+    if (lstCommon.getCardNums() < 5) {
+        printf("=======> my prob:\n");
+        HoldemCardTypeProb prob;
+        prob.analysisMe(lstHand, lstCommon, lstExclude);
+        prob.output();
+    }
+
+    {
+        printf("=======> others prob:\n");
+        HoldemCardTypeProb prob;
+        int winnums = prob.analysisOthers(lstCommon, lstHand, hcl);
+        prob.output();
+
+        printf("my win prob: %.2f\n", 100.0f * (prob.getTotalNums() - winnums) / prob.getTotalNums());
+    }
 }
 
 void cmd_procrange(Command& cmd) {

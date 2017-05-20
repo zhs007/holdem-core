@@ -24,33 +24,6 @@ const int MAX_HOLDEM_CARDTYPE           = 10;   // 牌型10种
 void makeHoldemCardTypeStr(std::string& str, int hct);
 
 //======================================================================================================================
-// 牌型概率
-class HoldemCardTypeProb {
-public:
-    HoldemCardTypeProb() { clear(); }
-    ~HoldemCardTypeProb() {}
-public:
-    void analysisOthers(CardList& lstCards, CardList& lstExclude);
-public:
-    void clear();
-
-    void addCardTypeNums(int ct, int nums);
-
-    void output();
-protected:
-    void _analysisOthers_3_foreach(CardList& lstCards, CardList& lstExclude);
-    void _analysisOthers_4_foreach(CardList& lstCards, CardList& lstExclude);
-    void _analysisOthers_5_foreach(CardList& lstCards, CardList& lstExclude);
-
-    void _analysisOthers_3(CardList& lstCards, CardList& lstExclude);
-
-    int countTotalNums(int totalnums, int neednums);
-protected:
-    int m_numsCardType[MAX_HOLDEM_CARDTYPE];
-    int m_numsTotal;
-};
-
-//======================================================================================================================
 // 德州牌
 class HoldemCardList : public CardList {
 public:
@@ -64,8 +37,50 @@ public:
     int buildWith(CardList& lstCards);
 
     int getCardType() const { return m_cardtype; }
+
+    int cmp(HoldemCardList& right) const;
 protected:
     int     m_cardtype;
+};
+
+//======================================================================================================================
+// 牌型概率
+class HoldemCardTypeProb {
+public:
+    HoldemCardTypeProb() { clear(); }
+    ~HoldemCardTypeProb() {}
+public:
+    void analysisFullOthers(CardList& lstCards, CardList& lstExclude);
+
+    int analysisOthers(CardList& lstCards, CardList& lstExclude, HoldemCardList& lstMine);
+
+    void analysisMe(CardList& lstHand, CardList& lstCommon, CardList& lstExclude);
+public:
+    void clear();
+
+    void addCardTypeNums(int ct, int nums);
+
+    void output();
+
+    int getTotalNums() const { return m_numsTotal; }
+protected:
+    void _analysisFullOthers_3_foreach(CardList& lstCards, CardList& lstExclude);
+    void _analysisFullOthers_4_foreach(CardList& lstCards, CardList& lstExclude);
+    void _analysisFullOthers_5_foreach(CardList& lstCards, CardList& lstExclude);
+
+    int _analysisOthers_3_foreach(CardList& lstCards, CardList& lstExclude, HoldemCardList& lstMine);
+    int _analysisOthers_4_foreach(CardList& lstCards, CardList& lstExclude, HoldemCardList& lstMine);
+    int _analysisOthers_5_foreach(CardList& lstCards, CardList& lstExclude, HoldemCardList& lstMine);
+
+    void _analysisMe_3_foreach(CardList& lstHand, CardList& lstExclude);
+    void _analysisMe_4_foreach(CardList& lstHand, CardList& lstExclude);
+
+    void _analysisOthers_3(CardList& lstCards, CardList& lstExclude);
+
+    int countTotalNums(int totalnums, int neednums);
+protected:
+    int m_numsCardType[MAX_HOLDEM_CARDTYPE];
+    int m_numsTotal;
 };
 
 #endif //HOLDEM_CORE_HOLDEMCARDLOGIC_H
