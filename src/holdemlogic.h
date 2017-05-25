@@ -103,22 +103,32 @@ public:
     void playerBet(int station, int bet);
 
     void newTurn();
+public:
+    void ctrl_ante();
+
+    int ctrl_sb();
+
+    int ctrl_bb(int sbp);
+
+    int ctrl_straddle(int bbp);
+
+    void pushCtrl(int ctrlid, int station, int money, CardList& lstCards);
 protected:
-    std::vector<HoldemCtrl> m_lstCtrl;
-    std::vector<HoldemPlayer> m_lstPlayer;
+    std::vector<HoldemCtrl>     m_lstCtrl;
+    std::vector<HoldemPlayer>   m_lstPlayer;
 
-    int                     m_totalPool;
-    int                     m_curplayer;
+    int                         m_totalPool;
+    int                         m_curplayer;
 
-    int                     m_ante;         // 如果-1表示没有ante
-    int                     m_straddle;     // 如果-1表示没有straddle
+    int                         m_ante;         // 如果-1表示没有ante
+    int                         m_straddle;     // 如果-1表示没有straddle
 
-    int                     m_sb;           // sb
-    int                     m_bb;           // bb
+    int                         m_sb;           // sb
+    int                         m_bb;           // bb
 
-    int                     m_button;
+    int                         m_button;
 
-    int                     m_curBet;       // 当前最大下注
+    int                         m_curBet;       // 当前最大下注
 };
 
 #endif //HOLDEM_CORE_HOLDEMLOGIC_H

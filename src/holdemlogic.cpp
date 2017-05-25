@@ -472,20 +472,12 @@ void HoldemLogic::start(int ante, int sb, int bb, int straddle, int playernums, 
         m_lstPlayer.push_back(hp);
     }
 
-    if (ante > 0) {
-        m_totalPool += playernums * ante;
-    }
+    ctrl_ante();
+    int sbp = ctrl_sb();
+    int bbp = ctrl_bb(sbp);
+    int sp = ctrl_straddle(bbp);
 
-    int sbp = nextPlayer(m_button);
-    playerBet(sbp, sb);
-
-    int bbp = nextPlayer(m_button);
-    playerBet(bbp, bb);
-
-    if (straddle > 0) {
-        int sp = nextPlayer(m_button);
-        playerBet(sp, straddle);
-    }
+    m_curplayer = nextPlayer(sp);
 }
 
 int HoldemLogic::nextPlayer(int curstation) {
@@ -529,4 +521,58 @@ void HoldemLogic::newTurn() {
     }
 
     m_curBet = 0;
+}
+
+void HoldemLogic::ctrl_ante() {
+    if (m_ante > 0) {
+        m_totalPool += m_lstPlayer.size() * m_ante;
+
+        CardList lstCards;
+        pushCtrl(HOLDEM_CTRL_ANTE, -1, m_ante, lstCards);
+    }
+}
+
+int HoldemLogic::ctrl_sb() {
+    int sbp = nextPlayer(m_button);
+    playerBet(sbp, m_sb);
+
+    CardList lstCards;
+    pushCtrl(HOLDEM_CTRL_SB, sbp, m_sb, lstCards);
+
+    return sbp;
+}
+
+int HoldemLogic::ctrl_bb(int sbp) {
+    int bbp = nextPlayer(sbp);
+    playerBet(bbp, m_bb);
+
+    CardList lstCards;
+    pushCtrl(HOLDEM_CTRL_BB, bbp, m_bb, lstCards);
+
+    return bbp;
+}
+
+int HoldemLogic::ctrl_straddle(int bbp) {
+    if (m_straddle > 0) {
+        int sp = nextPlayer(bbp);
+        playerBet(sp, m_straddle);
+
+        CardList lstCards;
+        pushCtrl(HOLDEM_CTRL_STRADDLE, sp, m_straddle, lstCards);
+
+        return sp;
+    }
+
+    return bbp;
+}
+
+void HoldemLogic::pushCtrl(int ctrlid, int station, int money, CardList& lstCards) {
+    HoldemCtrl hc;
+
+    hc.ctrlid = ctrlid;
+    hc.player = station;
+    hc.money = money;
+    hc.lstCard = lstCards;
+
+    m_lstCtrl.push_back(hc);
 }
