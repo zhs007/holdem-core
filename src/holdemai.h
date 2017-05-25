@@ -5,7 +5,15 @@
 #ifndef HOLDEM_CORE_HOLDEMAI_H
 #define HOLDEM_CORE_HOLDEMAI_H
 
+#include <functional>
+#include <map>
 #include "holdemlogic.h"
+
+class HoldemAI;
+typedef std::function< HoldemAI*(HoldemLogic&, int) > FuncNewAI;
+
+//======================================================================================================================
+// HoldemAI
 
 class HoldemAI{
 public:
@@ -21,6 +29,26 @@ public:
 protected:
     HoldemLogic&    m_logic;
     int             m_myStation;
+};
+
+//======================================================================================================================
+// HoldemAIMgr
+
+class HoldemAIMgr{
+public:
+    typedef std::map<std::string, FuncNewAI> _Map;
+    typedef std::pair<std::string, FuncNewAI> _Pair;
+public:
+    static HoldemAIMgr& getSingleton();
+public:
+    bool regAI(const char* ainame, FuncNewAI func);
+
+    HoldemAI* newAI(const char* ainame, HoldemLogic& hl, int myStation);
+protected:
+    HoldemAIMgr();
+    ~HoldemAIMgr();
+protected:
+    _Map m_map;
 };
 
 #endif //HOLDEM_CORE_HOLDEMAI_H
