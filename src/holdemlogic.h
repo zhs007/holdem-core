@@ -8,6 +8,8 @@
 #include <string>
 #include "holdemcardlogic.h"
 
+class HoldemAI;
+
 const int HOLDEM_STATION_BUTTON     =   0;  // button
 const int HOLDEM_STATION_SB         =   1;  // small blind
 const int HOLDEM_STATION_BB         =   2;  // big blind
@@ -45,6 +47,7 @@ const int HOLDEM_CTRL_FLOP          =   9;  // flop
 const int HOLDEM_CTRL_TURN          =   10;  // turn
 const int HOLDEM_CTRL_RIVER         =   11;  // river
 const int HOLDEM_CTRL_RESULT        =   12;  // result
+const int HOLDEM_CTRL_HANDCARDS     =   13;  // handcards
 
 //======================================================================================================================
 // HoldemCtrl
@@ -64,9 +67,12 @@ struct HoldemCtrl {
 };
 
 //======================================================================================================================
-// HoldemUserInfo
+// HoldemPlayer
 
 struct HoldemPlayer {
+    std::string platform;
+    std::string name;
+
     int         station;
     CardList    lstCard;
     int         money;
@@ -76,12 +82,15 @@ struct HoldemPlayer {
     bool        isFold;
     bool        isAllIn;
 
+    HoldemAI*   pAI;
+
     HoldemPlayer()
             : station(-1)
             , money(0)
             , bet_turn(0)
             , isFold(false)
-            , isAllIn(false) {
+            , isAllIn(false)
+            , pAI(NULL) {
 
     }
 };
@@ -96,13 +105,25 @@ public:
 public:
     void clear();
 
-    void start(int ante, int sb, int bb, int straddle, int playernums, int button);
+    void setOutputLog(bool isOutputLog) { m_isOutputLog = isOutputLog; }
+
+    void init(int ante, int sb, int bb, int straddle, int playernums, int button);
+
+    void setPlayer(int station, const char* platform, const char* name, bool isAI);
+
+    void start();
 public:
     int nextPlayer(int curstation);
 
-    void playerBet(int station, int bet);
+    void playerBet(int station, int bet, bool isAllIn = false, bool isAddCtrl = false);
 
     void newTurn();
+
+    void requestPlayerCtrl(int station);
+
+    void setPlayerHandCards(int station, CardList& lstCards);
+
+    void addCommonCards(CardList& lstCards);
 public:
     void ctrl_ante();
 
@@ -111,6 +132,14 @@ public:
     int ctrl_bb(int sbp);
 
     int ctrl_straddle(int bbp);
+
+    void ctrl_handcards(int station, CardList& lstCards);
+
+    void ctrl_flop(CardList& lstCards);
+
+    void ctrl_turn(CardList& lstCards);
+
+    void ctrl_river(CardList& lstCards);
 
     void pushCtrl(int ctrlid, int station, int money, CardList& lstCards);
 protected:
@@ -129,6 +158,13 @@ protected:
     int                         m_button;
 
     int                         m_curBet;       // 当前最大下注
+
+    bool                        m_isOutputLog;
+
+    int                         m_maxPlayer;    // 当前最大注玩家
+    int                         m_playerWaitBB; // 这个不为-1时，表示最后到BB或straddle玩家行动（最大注玩家是BB或straddle时）
+
+    CardList                    m_commonCards;
 };
 
 #endif //HOLDEM_CORE_HOLDEMLOGIC_H

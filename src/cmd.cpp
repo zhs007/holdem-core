@@ -19,6 +19,10 @@ bool isChar_az09(char c) {
         return true;
     }
 
+    if (c == '-') {
+        return true;
+    }
+
     return false;
 }
 
@@ -207,6 +211,128 @@ void cmd_procrange(Command& cmd) {
     printf("my range: %d\n", range);
 }
 
+void cmd_begin(Command& cmd) {
+    HoldemLogic& logic = CommandMgr::getSingleton().getLogic();
+
+    int arri[6];
+    if (cmd.lstParam.size() != 6) {
+        printf("please input begin ante sb bb straddle playernums button\n");
+
+        return ;
+    }
+
+    for (int i = 0; i < cmd.lstParam.size(); ++i) {
+        arri[i] = atoi(cmd.lstParam[i].c_str());
+    }
+
+    printf("cmd_begin [%d, %d, %d, %d, %d, %d]\n", arri[0], arri[1], arri[2], arri[3], arri[4], arri[5]);
+
+    logic.init(arri[0], arri[1], arri[2], arri[3], arri[4], arri[5]);
+}
+
+void cmd_playerinfo(Command& cmd) {
+    HoldemLogic& logic = CommandMgr::getSingleton().getLogic();
+
+    if (cmd.lstParam.size() != 4) {
+        printf("please input spi station platform uname isai\n");
+
+        return ;
+    }
+
+    int station = atoi(cmd.lstParam[0].c_str());
+    std::string platform = cmd.lstParam[1];
+    std::string uname = cmd.lstParam[2];
+    int isAI = atoi(cmd.lstParam[3].c_str());
+
+    printf("cmd_playerinfo [%d, %s, %s, %d]\n", station, platform.c_str(), uname.c_str(), isAI);
+
+    logic.setPlayer(station, platform.c_str(), uname.c_str(), isAI);
+}
+
+void cmd_start(Command& cmd) {
+    HoldemLogic& logic = CommandMgr::getSingleton().getLogic();
+
+    printf("cmd_start\n");
+
+    logic.start();
+}
+
+void cmd_sethandcards(Command& cmd) {
+    HoldemLogic& logic = CommandMgr::getSingleton().getLogic();
+
+    if (cmd.lstParam.size() != 3) {
+        printf("please input shc station card0 card1\n");
+
+        return ;
+    }
+
+    int station = atoi(cmd.lstParam[0].c_str());
+
+    CardList lstHand;
+
+    std::string strp;
+    CardInfo ci0;
+    strp += cmd.lstParam[1];
+    ci0.setWithStr(cmd.lstParam[1].c_str());
+
+    CardInfo ci1;
+    strp += ",";
+    strp += cmd.lstParam[2];
+    ci1.setWithStr(cmd.lstParam[2].c_str());
+
+    lstHand.addCard(ci0);
+    lstHand.addCard(ci1);
+
+    printf("cmd_sethandcards [%d, %s]\n", station, strp.c_str());
+
+    logic.setPlayerHandCards(station, lstHand);
+}
+
+void cmd_bet(Command& cmd) {
+    HoldemLogic& logic = CommandMgr::getSingleton().getLogic();
+
+    if (cmd.lstParam.size() != 3) {
+        printf("please input bet station money isallin\n");
+    }
+
+    int station = atoi(cmd.lstParam[0].c_str());
+    int money = atoi(cmd.lstParam[1].c_str());
+    int isallin = atoi(cmd.lstParam[2].c_str());
+
+    printf("cmd_bet [%d, %d, %d]\n", station, money, isallin);
+
+    logic.playerBet(station, money, isallin != 0, true);
+}
+
+void cmd_commoncards(Command& cmd) {
+    HoldemLogic& logic = CommandMgr::getSingleton().getLogic();
+
+    if (cmd.lstParam.size() != 3 && cmd.lstParam.size() != 1) {
+        printf("please input cc cards(0||3)\n");
+    }
+
+    CardList lstCommon;
+    std::string strp;
+    for (int i = 0; i < cmd.lstParam.size(); ++i) {
+        CardInfo ci;
+
+        if (i > 0) {
+            strp += ",";
+        }
+
+        strp += cmd.lstParam[i];
+
+        ci.setWithStr(cmd.lstParam[i].c_str());
+
+        lstCommon.addCard(ci);
+    }
+
+    printf("cmd_commonccards [%s]\n", strp.c_str());
+
+    logic.addCommonCards(lstCommon);
+    logic.newTurn();
+}
+
 CommandMgr& CommandMgr::getSingleton() {
     static CommandMgr s_mgr;
 
@@ -281,12 +407,21 @@ void CommandMgr::getCmd(char* strbuf, int len) {
 }
 
 CommandMgr::CommandMgr() {
-    regCommand("exit", cmd_exit);
-    regCommand("hs", cmd_getposition);
-    regCommand("pc", cmd_proccards);
-    regCommand("ac", cmd_analysiscards);
-    regCommand("acex", cmd_analysiscardsex);
-    regCommand("pr", cmd_procrange);
+    m_logic.setOutputLog(true);
+
+    regCommand("exit", cmd_exit);                   // 退出 - exit
+    regCommand("hs", cmd_getposition);              // 判断位置 - hs 1 2
+    regCommand("pc", cmd_proccards);                // 处理牌局面 - pc 1a 2a 3a 4a 52
+    regCommand("ac", cmd_analysiscards);            // 分析牌局面 - ac 1a 2a 3a 4a 52
+    regCommand("acex", cmd_analysiscardsex);        // 分析牌局面2 - acex 1a 2a 3a 4a 52
+    regCommand("pr", cmd_procrange);                // 确定手牌range - pr 1a 2a
+
+    regCommand("begin", cmd_begin);                 // 开始牌局 - begin 0 1 2 0 6 3
+    regCommand("spi", cmd_playerinfo);              // 设置牌局用户 - spi 0 ps zhs007 0
+    regCommand("st", cmd_start);                    // 开局 - st
+    regCommand("shc", cmd_sethandcards);            // 手牌 - shc 0 37 38
+    regCommand("bet", cmd_bet);                     // 下注 - bet 0 100 0
+    regCommand("cc", cmd_commoncards);              // 发公共牌 - cc 1a 2a 3a
 }
 
 CommandMgr::~CommandMgr() {

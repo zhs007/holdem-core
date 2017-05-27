@@ -10,6 +10,7 @@
 #include <cstring>
 #include <functional>
 #include <map>
+#include "holdemlogic.h"
 
 struct Command{
     std::string                 strCmd;
@@ -33,11 +34,15 @@ public:
     void regCommand(const char* str, FuncCommand func);
 
     void getCmd(char* strbuf, int len);
+
+    HoldemLogic& getLogic() { return m_logic; }
 protected:
     CommandMgr();
     ~CommandMgr();
 protected:
-    _Map m_map;
+    _Map            m_map;
+
+    HoldemLogic     m_logic;
 };
 
 #endif //HOLDEM_CORE_CMD_H
