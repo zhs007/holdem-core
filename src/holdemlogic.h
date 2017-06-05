@@ -35,6 +35,14 @@ int getHoldemStationWithOff(int playernums, int off);
 int countRange(CardList& lstHand);
 
 //======================================================================================================================
+// HoldemGameState
+
+const int HOLDEMGAMESTATE_PREFLOP   =   0;
+const int HOLDEMGAMESTATE_FLOP      =   1;
+const int HOLDEMGAMESTATE_TURN      =   2;
+const int HOLDEMGAMESTATE_RIVER     =   3;
+
+//======================================================================================================================
 // ctrl
 
 const int HOLDEM_CTRL_NULL          =   0;  // null
@@ -162,10 +170,15 @@ public:
     void pushCtrl(int ctrlid, int station, int money, CardList& lstCards);
 public:
     HoldemPlayer& getPlayer(int station) { return m_lstPlayer[station]; }
+
+    int getMaxStation() { return m_maxStation; }
+
+    int getHoldemGameState() { return m_holdemState; }
 protected:
     std::vector<HoldemCtrl>     m_lstCtrl;
     std::vector<HoldemPlayer>   m_lstPlayer;
     int                         m_playerNums;
+    int                         m_maxStation;
 
     int                         m_totalPool;
     int                         m_curplayer;
@@ -186,6 +199,8 @@ protected:
     int                         m_playerWaitBB; // 这个不为-1时，表示最后到BB或straddle玩家行动（最大注玩家是BB或straddle时）
 
     CardList                    m_commonCards;
+
+    int                         m_holdemState;
 };
 
 #endif //HOLDEM_CORE_HOLDEMLOGIC_H

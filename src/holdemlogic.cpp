@@ -449,6 +449,8 @@ HoldemLogic::~HoldemLogic() {
 }
 
 void HoldemLogic::clear() {
+    m_holdemState = -1;
+
     m_lstCtrl.clear();
     m_lstPlayer.clear();
 
@@ -487,6 +489,9 @@ void HoldemLogic::init(int ante, int sb, int bb, int straddle, int playernums, i
     }
 
     m_playerNums = playernums;
+    m_maxStation = playernums - 1;
+
+    m_holdemState = HOLDEMGAMESTATE_PREFLOP;
 }
 
 void HoldemLogic::setPlayer(int station, const char* platform, const char* name, bool isAI) {
