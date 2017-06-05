@@ -39,6 +39,8 @@ public:
     virtual void onRequest();
 protected:
     void initAllPlayer();
+
+    void onRequest_Preflop();
 public:
     int                                 m_myHS;
     int                                 m_myRange;
@@ -46,6 +48,8 @@ public:
     std::vector<HoldemPlayer_simons>    m_lstPlayer;
 
     std::vector<int>                    m_lstRaisePreflop;
+
+    int                                 m_waitFirstCtrl;        // 剩下的第一次操作都没做的人
 };
 
 #endif //HOLDEM_CORE_AISIMONS_H

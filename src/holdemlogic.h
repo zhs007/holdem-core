@@ -46,20 +46,24 @@ const int HOLDEMGAMESTATE_RIVER     =   3;
 // ctrl
 
 const int HOLDEM_CTRL_NULL          =   0;  // null
-const int HOLDEM_CTRL_ANTE          =   1;  // ante
-const int HOLDEM_CTRL_SB            =   2;  // sb
-const int HOLDEM_CTRL_BB            =   3;  // bb
-const int HOLDEM_CTRL_STRADDLE      =   4;  // straddle
-const int HOLDEM_CTRL_FOLD          =   4;  // fold
-const int HOLDEM_CTRL_CALL          =   5;  // call
-const int HOLDEM_CTRL_CHECK         =   6;  // check
-const int HOLDEM_CTRL_RAISE         =   7;  // raise
-const int HOLDEM_CTRL_ALLIN         =   8;  // all in
-const int HOLDEM_CTRL_FLOP          =   9;  // flop
-const int HOLDEM_CTRL_TURN          =   10;  // turn
-const int HOLDEM_CTRL_RIVER         =   11;  // river
-const int HOLDEM_CTRL_RESULT        =   12;  // result
-const int HOLDEM_CTRL_HANDCARDS     =   13;  // handcards
+const int HOLDEM_CTRL_FLOP          =   1;  // flop
+const int HOLDEM_CTRL_TURN          =   2;  // turn
+const int HOLDEM_CTRL_RIVER         =   3;  // river
+const int HOLDEM_CTRL_RESULT        =   4;  // result
+const int HOLDEM_CTRL_HANDCARDS     =   5;  // handcards
+const int HOLDEM_CTRL_BET           =   6;  // bet
+
+//======================================================================================================================
+// HoldemBetType
+
+const int HOLDEM_BET_ANTE           =   1;  // ante
+const int HOLDEM_BET_SB             =   2;  // sb
+const int HOLDEM_BET_BB             =   3;  // bb
+const int HOLDEM_BET_STRADDLE       =   4;  // straddle
+const int HOLDEM_BET_FOLD           =   5;  // fold
+const int HOLDEM_BET_CALL           =   6;  // call
+const int HOLDEM_BET_CHECK          =   7;  // check
+const int HOLDEM_BET_RAISE          =   8;  // raise
 
 //======================================================================================================================
 // HoldemCtrl
@@ -68,12 +72,26 @@ struct HoldemCtrl {
     int         player;
     int         ctrlid;
     CardList    lstCard;
+
+    bool        isForce;    // 是否强制，ante、sb、bb、straddle都算强制
+    bool        isRaise;    // 是否加注
+    bool        isAllin;    // 是否allin
+    bool        isFold;     // 是否fold
+
     int         money;
+
+    int         bettype;    // 下注类型
 
     HoldemCtrl()
             : player(-1)
             , ctrlid(HOLDEM_CTRL_NULL)
-            , money(0) {
+            , money(0)
+            , bettype(-1)
+            , isForce(false)
+            , isRaise(false)
+            , isAllin(false)
+            , isFold(false)
+    {
 
     }
 };
@@ -167,13 +185,15 @@ public:
 
     void ctrl_river(CardList& lstCards);
 
-    void pushCtrl(int ctrlid, int station, int money, CardList& lstCards);
+    void pushCtrl(int ctrlid, int station, int money, CardList& lstCards, int bettype, bool isRaise, bool isAllin);
 public:
     HoldemPlayer& getPlayer(int station) { return m_lstPlayer[station]; }
 
     int getMaxStation() { return m_maxStation; }
 
     int getHoldemGameState() { return m_holdemState; }
+
+    int getBB() { return m_bb; }
 protected:
     std::vector<HoldemCtrl>     m_lstCtrl;
     std::vector<HoldemPlayer>   m_lstPlayer;

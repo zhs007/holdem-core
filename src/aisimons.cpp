@@ -30,22 +30,27 @@ void HoldemAI_simons::onCtrl(HoldemCtrl& ctrl) {
 
     int hgs = m_logic.getHoldemGameState();
     if (hgs == HOLDEMGAMESTATE_PREFLOP) {
-        if (ctrl.ctrlid == HOLDEM_CTRL_FOLD) {
-            m_lstPlayer[ctrl.player].proflopCtrl = PERFLOP_FOLD;
-        }
-        else if (ctrl.ctrlid == HOLDEM_CTRL_RAISE) {
-            m_lstRaisePreflop.push_back(ctrl.player);
-            int raisenums = m_lstRaisePreflop.size();
-            if (raisenums == 1) {
-                m_lstPlayer[ctrl.player].proflopCtrl = PERFLOP_OPEN;
+        if (ctrl.ctrlid == HOLDEM_CTRL_BET) {
+            if (ctrl.isForce) {
+
+            }
+            else if (ctrl.isFold) {
+                m_lstPlayer[ctrl.player].proflopCtrl = PERFLOP_FOLD;
+            }
+            else if (ctrl.isRaise) {
+                m_lstRaisePreflop.push_back(ctrl.player);
+                int raisenums = m_lstRaisePreflop.size();
+                if (raisenums == 1) {
+                    m_lstPlayer[ctrl.player].proflopCtrl = PERFLOP_OPEN;
+                }
+                else {
+                    m_lstPlayer[ctrl.player].proflopCtrl = PERFLOP_3BET;
+                }
             }
             else {
-                m_lstPlayer[ctrl.player].proflopCtrl = PERFLOP_3BET;
-            }
-        }
-        else if (ctrl.ctrlid == HOLDEM_CTRL_CALL || ctrl.ctrlid == HOLDEM_CTRL_CHECK) {
-            if (m_lstPlayer[ctrl.player].proflopCtrl == -1) {
-                m_lstPlayer[ctrl.player].proflopCtrl = PERFLOP_LIMP;
+                if (m_lstPlayer[ctrl.player].proflopCtrl == -1) {
+                    m_lstPlayer[ctrl.player].proflopCtrl = PERFLOP_LIMP;
+                }
             }
         }
     }
@@ -53,11 +58,40 @@ void HoldemAI_simons::onCtrl(HoldemCtrl& ctrl) {
 
 void HoldemAI_simons::onRequest() {
     printf("request simons...\n");
+    int hgs = m_logic.getHoldemGameState();
+    if (hgs == HOLDEMGAMESTATE_PREFLOP) {
+        onRequest_Preflop();
+    }
+}
+
+void HoldemAI_simons::onRequest_Preflop() {
+    int raiseplayers = m_lstRaisePreflop.size();
+    if (raiseplayers == 0) {    // 没人加注
+        if (m_lstPlayer[m_myStation].pPlayer->holdemstation == HOLDEM_STATION_UTG) {
+            if (m_myRange <= 4) {
+                m_logic.playerBet(m_myStation, m_logic.getBB() * 3, false, true);
+            }
+            else if (m_myRange >= 9) {
+                m_logic.playerBet(m_myStation, m_logic.getBB(), false, true);
+            }
+            else {
+                m_logic.playerBet(m_myStation, -1, false, true);
+            }
+        }
+        else {
+
+        }
+    }
+    else {
+
+    }
 }
 
 void HoldemAI_simons::initAllPlayer() {
     m_lstRaisePreflop.clear();
     m_lstPlayer.clear();
+
+    m_waitFirstCtrl = 0;
 
     for (int i = 0; i <= m_logic.getMaxStation(); ++i) {
         HoldemPlayer_simons cp;
@@ -69,5 +103,9 @@ void HoldemAI_simons::initAllPlayer() {
         }
 
         m_lstPlayer.push_back(cp);
+
+        if (!lcp.isLeft) {
+            m_waitFirstCtrl++;
+        }
     }
 }

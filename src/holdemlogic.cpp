@@ -548,13 +548,15 @@ int HoldemLogic::nextPlayer(int curstation) {
 
 void HoldemLogic::playerBet(int station, int bet, bool isAllIn, bool isAddCtrl) {
     int lastbet = m_curBet;
-    int curctrl = HOLDEM_CTRL_CHECK;
+    bool isRaise = false;
+
+    int curbetctrl = HOLDEM_BET_CHECK;
 
     if (bet < 0) {
-        curctrl = HOLDEM_CTRL_FOLD;
+        curbetctrl = HOLDEM_BET_FOLD;
     }
     else if (bet == 0) {
-        curctrl = HOLDEM_CTRL_CHECK;
+        curbetctrl = HOLDEM_BET_CHECK;
     }
 
     if (bet > 0) {
@@ -572,26 +574,26 @@ void HoldemLogic::playerBet(int station, int bet, bool isAllIn, bool isAddCtrl) 
         m_maxPlayer = station;
     }
 
-    if (curctrl == HOLDEM_CTRL_FOLD) {
+    if (curbetctrl == HOLDEM_BET_FOLD) {
         m_lstPlayer[station].isFold = true;
     }
 
     if (isAllIn) {
         m_lstPlayer[station].isAllIn = true;
-
-        curctrl = HOLDEM_CTRL_ALLIN;
     }
-    else if (m_lstPlayer[station].bet_turn > lastbet) {
-        curctrl = HOLDEM_CTRL_RAISE;
+
+    if (m_lstPlayer[station].bet_turn > lastbet) {
+        isRaise = true;
+        curbetctrl = HOLDEM_BET_RAISE;
     }
     else if (m_lstPlayer[station].bet_turn == lastbet) {
-        curctrl = HOLDEM_CTRL_CALL;
+        curbetctrl = HOLDEM_BET_CALL;
     }
 
     if (isAddCtrl) {
         CardList lstCards;
 
-        pushCtrl(curctrl, station, bet, lstCards);
+        pushCtrl(HOLDEM_CTRL_BET, station, bet, lstCards, curbetctrl, isRaise, isAllIn);
 
         if (m_isOutputLog) {
             printf("%d players bet %d\n", station, bet);
@@ -662,7 +664,7 @@ void HoldemLogic::ctrl_ante() {
         m_totalPool += m_lstPlayer.size() * m_ante;
 
         CardList lstCards;
-        pushCtrl(HOLDEM_CTRL_ANTE, -1, m_ante, lstCards);
+        pushCtrl(HOLDEM_CTRL_BET, -1, m_ante, lstCards, HOLDEM_BET_ANTE, false, false);
 
         if (m_isOutputLog) {
             printf("all players ante %d\n", m_ante);
@@ -675,7 +677,7 @@ int HoldemLogic::ctrl_sb() {
     playerBet(sbp, m_sb);
 
     CardList lstCards;
-    pushCtrl(HOLDEM_CTRL_SB, sbp, m_sb, lstCards);
+    pushCtrl(HOLDEM_CTRL_BET, sbp, m_sb, lstCards, HOLDEM_BET_SB, false, false);
 
     if (m_isOutputLog) {
         printf("%d players bet sb %d\n", sbp, m_sb);
@@ -689,7 +691,7 @@ int HoldemLogic::ctrl_bb(int sbp) {
     playerBet(bbp, m_bb);
 
     CardList lstCards;
-    pushCtrl(HOLDEM_CTRL_BB, bbp, m_bb, lstCards);
+    pushCtrl(HOLDEM_CTRL_BET, bbp, m_bb, lstCards, HOLDEM_BET_BB, false, false);
 
     if (m_isOutputLog) {
         printf("%d players bet bb %d\n", bbp, m_bb);
@@ -704,7 +706,7 @@ int HoldemLogic::ctrl_straddle(int bbp) {
         playerBet(sp, m_straddle);
 
         CardList lstCards;
-        pushCtrl(HOLDEM_CTRL_STRADDLE, sp, m_straddle, lstCards);
+        pushCtrl(HOLDEM_CTRL_BET, sp, m_straddle, lstCards, HOLDEM_BET_STRADDLE, false, false);
 
         return sp;
     }
@@ -713,16 +715,31 @@ int HoldemLogic::ctrl_straddle(int bbp) {
 }
 
 void HoldemLogic::ctrl_handcards(int station, CardList& lstCards) {
-    pushCtrl(HOLDEM_CTRL_HANDCARDS, station, 0, lstCards);
+    pushCtrl(HOLDEM_CTRL_HANDCARDS, station, 0, lstCards, -1, false, false);
 }
 
-void HoldemLogic::pushCtrl(int ctrlid, int station, int money, CardList& lstCards) {
+void HoldemLogic::pushCtrl(int ctrlid, int station, int money, CardList& lstCards, int bettype, bool isRaise, bool isAllin) {
     HoldemCtrl hc;
 
     hc.ctrlid = ctrlid;
     hc.player = station;
     hc.money = money;
     hc.lstCard = lstCards;
+
+    hc.bettype = bettype;
+    if (ctrlid == HOLDEM_CTRL_BET) {
+        if (bettype == HOLDEM_BET_ANTE || bettype == HOLDEM_BET_SB || bettype == HOLDEM_BET_BB ||
+                bettype == HOLDEM_BET_STRADDLE) {
+            hc.isForce = true;
+        }
+
+        if (money < 0) {
+            hc.isFold = true;
+        }
+
+        hc.isAllin = isAllin;
+        hc.isRaise = isRaise;
+    }
 
     m_lstCtrl.push_back(hc);
 
@@ -753,15 +770,15 @@ void HoldemLogic::addCommonCards(CardList& lstCards) {
 }
 
 void HoldemLogic::ctrl_flop(CardList& lstCards) {
-    pushCtrl(HOLDEM_CTRL_FLOP, -1, 0, lstCards);
+    pushCtrl(HOLDEM_CTRL_FLOP, -1, 0, lstCards, -1, false, false);
 }
 
 void HoldemLogic::ctrl_turn(CardList& lstCards) {
-    pushCtrl(HOLDEM_CTRL_TURN, -1, 0, lstCards);
+    pushCtrl(HOLDEM_CTRL_TURN, -1, 0, lstCards, -1, false, false);
 }
 
 void HoldemLogic::ctrl_river(CardList& lstCards) {
-    pushCtrl(HOLDEM_CTRL_RIVER, -1, 0, lstCards);
+    pushCtrl(HOLDEM_CTRL_RIVER, -1, 0, lstCards, -1, false, false);
 }
 
 // 根据button位，计算所有人的位置
