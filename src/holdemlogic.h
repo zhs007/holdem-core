@@ -27,6 +27,10 @@ void makeHoldemStationStr(std::string& str, int hs);
 // index从0开始
 int getHoldemStation(int playernums, int buttonindex, int index);
 
+// 根据人数和当前位置与button位的差，求当前位置
+// off从0开始
+int getHoldemStationWithOff(int playernums, int off);
+
 // 获取手牌range
 int countRange(CardList& lstHand);
 
@@ -82,6 +86,10 @@ struct HoldemPlayer {
     bool        isFold;
     bool        isAllIn;
 
+    bool        isLeft;
+
+    int         holdemstation;
+
     HoldemAI*   pAI;
 
     HoldemPlayer()
@@ -90,7 +98,10 @@ struct HoldemPlayer {
             , bet_turn(0)
             , isFold(false)
             , isAllIn(false)
-            , pAI(NULL) {
+            , pAI(NULL)
+            , holdemstation(-1)
+            , isLeft(false)
+    {
 
     }
 };
@@ -111,6 +122,10 @@ public:
 
     void setPlayer(int station, const char* platform, const char* name, bool isAI);
 
+    void playerLeft(int station);
+
+    void playerIn(int station);
+
     void start();
 public:
     int nextPlayer(int curstation);
@@ -124,6 +139,9 @@ public:
     void setPlayerHandCards(int station, CardList& lstCards);
 
     void addCommonCards(CardList& lstCards);
+public:
+    // 根据button位，计算所有人的位置
+    void countAllHoldemStation();
 public:
     void ctrl_ante();
 
@@ -142,9 +160,12 @@ public:
     void ctrl_river(CardList& lstCards);
 
     void pushCtrl(int ctrlid, int station, int money, CardList& lstCards);
+public:
+    HoldemPlayer& getPlayer(int station) { return m_lstPlayer[station]; }
 protected:
     std::vector<HoldemCtrl>     m_lstCtrl;
     std::vector<HoldemPlayer>   m_lstPlayer;
+    int                         m_playerNums;
 
     int                         m_totalPool;
     int                         m_curplayer;

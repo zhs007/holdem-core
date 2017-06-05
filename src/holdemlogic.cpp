@@ -86,29 +86,9 @@ const int HS_2[] = {
         HOLDEM_STATION_UTG
 };
 
-// 根据人数、button位，确定index位置
-// index从0开始
-int getHoldemStation(int playernums, int buttonindex, int index) {
-    if (playernums <= 1) {
-        return -1;
-    }
-
-    if (buttonindex < 0 || buttonindex >= playernums) {
-        return -1;
-    }
-
-    if (index < 0 || index >= playernums) {
-        return -1;
-    }
-
-    int off = 0;
-    if (index > buttonindex) {
-        off = index - buttonindex;
-    }
-    else if (index < buttonindex) {
-        off = playernums - buttonindex - 1 + index;
-    }
-
+// 根据人数和当前位置与button位的差，求当前位置
+// off从0开始
+int getHoldemStationWithOff(int playernums, int off) {
     if (playernums == 10) {
         return HS_10[off];
     }
@@ -146,6 +126,32 @@ int getHoldemStation(int playernums, int buttonindex, int index) {
     }
 
     return -1;
+}
+
+// 根据人数、button位，确定index位置
+// index从0开始
+int getHoldemStation(int playernums, int buttonindex, int index) {
+    if (playernums <= 1) {
+        return -1;
+    }
+
+    if (buttonindex < 0 || buttonindex >= playernums) {
+        return -1;
+    }
+
+    if (index < 0 || index >= playernums) {
+        return -1;
+    }
+
+    int off = 0;
+    if (index > buttonindex) {
+        off = index - buttonindex;
+    }
+    else if (index < buttonindex) {
+        off = playernums - buttonindex - 1 + index;
+    }
+
+    return getHoldemStationWithOff(playernums, off);
 }
 
 void makeHoldemStationStr(std::string& str, int hs) {
@@ -479,6 +485,8 @@ void HoldemLogic::init(int ante, int sb, int bb, int straddle, int playernums, i
 
         m_lstPlayer.push_back(hp);
     }
+
+    m_playerNums = playernums;
 }
 
 void HoldemLogic::setPlayer(int station, const char* platform, const char* name, bool isAI) {
@@ -493,6 +501,8 @@ void HoldemLogic::setPlayer(int station, const char* platform, const char* name,
 }
 
 void HoldemLogic::start() {
+    countAllHoldemStation();
+
     ctrl_ante();
     int sbp = ctrl_sb();
     int bbp = ctrl_bb(sbp);
@@ -621,7 +631,7 @@ void HoldemLogic::requestPlayerCtrl(int station) {
         printf("request %d ctrl...\n", station);
 
         if (m_lstPlayer[station].pAI != NULL) {
-
+            m_lstPlayer[station].pAI->onRequest();
         }
     }
 }
@@ -710,6 +720,12 @@ void HoldemLogic::pushCtrl(int ctrlid, int station, int money, CardList& lstCard
     hc.lstCard = lstCards;
 
     m_lstCtrl.push_back(hc);
+
+    for (int i = 0; i < m_lstPlayer.size(); ++i) {
+        if (m_lstPlayer[i].pAI != NULL) {
+            m_lstPlayer[i].pAI->onCtrl(hc);
+        }
+    }
 }
 
 void HoldemLogic::addCommonCards(CardList& lstCards) {
@@ -741,4 +757,34 @@ void HoldemLogic::ctrl_turn(CardList& lstCards) {
 
 void HoldemLogic::ctrl_river(CardList& lstCards) {
     pushCtrl(HOLDEM_CTRL_RIVER, -1, 0, lstCards);
+}
+
+// 根据button位，计算所有人的位置
+void HoldemLogic::countAllHoldemStation() {
+    int off = 0;
+    for (int i = m_button; i < m_lstPlayer.size(); ++i) {
+        if (!m_lstPlayer[i].isLeft) {
+            m_lstPlayer[i].holdemstation = getHoldemStationWithOff(m_playerNums, off);
+            ++off;
+        }
+    }
+
+    for (int i = 0; i < m_button; ++i) {
+        if (!m_lstPlayer[i].isLeft) {
+            m_lstPlayer[i].holdemstation = getHoldemStationWithOff(m_playerNums, off);
+            ++off;
+        }
+    }
+}
+
+void HoldemLogic::playerLeft(int station) {
+    m_lstPlayer[station].isLeft = true;
+
+    m_playerNums--;
+}
+
+void HoldemLogic::playerIn(int station) {
+    m_lstPlayer[station].isLeft = false;
+
+    m_playerNums++;
 }

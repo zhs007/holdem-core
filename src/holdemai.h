@@ -26,6 +26,8 @@ public:
     virtual ~HoldemAI() {}
 public:
     virtual void onCtrl(HoldemCtrl& ctrl) = 0;
+
+    virtual void onRequest() = 0;
 protected:
     HoldemLogic&    m_logic;
     int             m_myStation;
