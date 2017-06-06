@@ -19,6 +19,11 @@ const int PERFLOP_LIMP = 1;
 const int PERFLOP_OPEN = 2;
 const int PERFLOP_3BET = 3;
 
+const int COMMON_FOLD       = 0;
+const int COMMON_SMALLBET   = 1;
+const int COMMON_BIGBET     = 2;
+const int COMMON_SUPPERBET  = 3;
+
 struct HoldemPlayer_simons {
     int             proflopCtrl;
     int             flopCtrl;

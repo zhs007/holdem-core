@@ -6,6 +6,13 @@
 #include "holdemai.h"
 #include "base.h"
 
+const char* __STR_CTRLTYPE[] = {
+        "fold",
+        "limp",
+        "open",
+        "redical"
+};
+
 HoldemAI* newAI_simons(HoldemLogic& hl, int myStation) {
     return new HoldemAI_simons(hl, myStation);
 }
@@ -73,8 +80,8 @@ void HoldemAI_simons::onRequest() {
     if (hgs == HOLDEMGAMESTATE_PREFLOP) {
         int ctrlstate = onRequest_Preflop();
 
-        printf("simons %d\n", ctrlstate);
-        ctrlBet(ctrlstate);
+        printf("simons %s\n", __STR_CTRLTYPE[ctrlstate]);
+        //ctrlBet(ctrlstate);
     }
 }
 
