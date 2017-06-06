@@ -546,6 +546,21 @@ int HoldemLogic::nextPlayer(int curstation) {
     return -1;
 }
 
+void HoldemLogic::playerCheckOrFold(int station) {
+    int mycallbet = getPlayerCallBet(station);
+    if (mycallbet == 0) {
+        playerBet(station, 0, false, true);
+    }
+
+    playerBet(station, -1, false, true);
+}
+
+void HoldemLogic::playerCall(int station) {
+    int mycallbet = getPlayerCallBet(station);
+
+    playerBet(station, mycallbet, false, true);
+}
+
 void HoldemLogic::playerBet(int station, int bet, bool isAllIn, bool isAddCtrl) {
     int lastbet = m_curBet;
     bool isRaise = false;
@@ -809,4 +824,8 @@ void HoldemLogic::playerIn(int station) {
     m_lstPlayer[station].isLeft = false;
 
     m_playerNums++;
+}
+
+int HoldemLogic::getPlayerCallBet(int station) {
+    return m_curBet - m_lstPlayer[station].bet_turn;
 }

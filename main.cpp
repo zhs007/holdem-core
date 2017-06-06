@@ -1,5 +1,6 @@
 #include <iostream>
 #include <stdio.h>
+#include <cstdlib>
 #include "src/cmd.h"
 
 const char* CMD[] = {
@@ -27,6 +28,8 @@ void procCmdArr(const char* arr[], int len) {
 }
 
 int main() {
+    srand(time(NULL));
+
     procCmdArr(CMD, 11);
 
     return 0;

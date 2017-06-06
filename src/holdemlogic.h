@@ -158,6 +158,10 @@ public:
 
     void playerBet(int station, int bet, bool isAllIn = false, bool isAddCtrl = false);
 
+    void playerCheckOrFold(int station);
+
+    void playerCall(int station);
+
     void newTurn();
 
     void requestPlayerCtrl(int station);
@@ -194,6 +198,12 @@ public:
     int getHoldemGameState() { return m_holdemState; }
 
     int getBB() { return m_bb; }
+
+    int getCallBet() { return m_curBet; }
+
+    int getPlayerCallBet(int station);
+
+    int getPOT() { return m_totalPool; }
 protected:
     std::vector<HoldemCtrl>     m_lstCtrl;
     std::vector<HoldemPlayer>   m_lstPlayer;
