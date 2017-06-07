@@ -79,7 +79,7 @@ struct CardInfo {
             rank = CARD_RANK_Q;
         }
         else if (str[1] == 'J' || str[1] == 'j') {
-            rank = CARD_RANK_K;
+            rank = CARD_RANK_J;
         }
         else if (str[1] == 'T' || str[1] == 't') {
             rank = CARD_RANK_10;

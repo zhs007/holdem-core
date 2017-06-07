@@ -286,7 +286,7 @@ void HoldemCardTypeProb::_analysisMe_3_foreach(CardList& lstCards, CardList& lst
         }
     }
 
-    for (int i0 = 0; i0 < lst.getCardNums() - 1; ++i0) {
+    for (int i0 = 0; i0 < lst.getCardNums(); ++i0) {
         CardList lstguess;
 
         lstguess.addCard(lst.getCard(i0));
@@ -309,7 +309,7 @@ void HoldemCardTypeProb::_analysisMe_4_foreach(CardList& lstCards, CardList& lst
         }
     }
 
-    for (int i0 = 0; i0 < lst.getCardNums() - 1; ++i0) {
+    for (int i0 = 0; i0 < lst.getCardNums(); ++i0) {
         CardList lstguess;
 
         lstguess.addCard(lst.getCard(i0));
@@ -356,8 +356,8 @@ int HoldemCardTypeProb::_analysisOthers_3_foreach(CardList& lstCards, CardList& 
     }
 
     int winnums = 0;
-    for (int i0 = 0; i0 < lst.getCardNums() - 3; ++i0) {
-        for (int i1 = i0 + 1; i1 < lst.getCardNums() - 2; ++i1) {
+    for (int i0 = 0; i0 < lst.getCardNums() - 1; ++i0) {
+        for (int i1 = i0 + 1; i1 < lst.getCardNums(); ++i1) {
             CardList lstguess;
 
             lstguess.addCard(lst.getCard(i0));
@@ -389,8 +389,8 @@ int HoldemCardTypeProb::_analysisOthers_4_foreach(CardList& lstCards, CardList& 
     }
 
     int winnums = 0;
-    for (int i0 = 0; i0 < lst.getCardNums() - 3; ++i0) {
-        for (int i1 = i0 + 1; i1 < lst.getCardNums() - 2; ++i1) {
+    for (int i0 = 0; i0 < lst.getCardNums() - 1; ++i0) {
+        for (int i1 = i0 + 1; i1 < lst.getCardNums(); ++i1) {
             CardList lstguess;
 
             lstguess.addCard(lst.getCard(i0));
@@ -422,8 +422,8 @@ int HoldemCardTypeProb::_analysisOthers_5_foreach(CardList& lstCards, CardList& 
     }
 
     int winnums = 0;
-    for (int i0 = 0; i0 < lst.getCardNums() - 3; ++i0) {
-        for (int i1 = i0 + 1; i1 < lst.getCardNums() - 2; ++i1) {
+    for (int i0 = 0; i0 < lst.getCardNums() - 1; ++i0) {
+        for (int i1 = i0 + 1; i1 < lst.getCardNums(); ++i1) {
             CardList lstguess;
 
             lstguess.addCard(lst.getCard(i0));
@@ -436,6 +436,102 @@ int HoldemCardTypeProb::_analysisOthers_5_foreach(CardList& lstCards, CardList& 
 
             if (hcl.cmp(lstMine) > 0) {
                 winnums++;
+            }
+        }
+    }
+
+    return winnums;
+}
+
+// 分析别人当前手牌以外，再多分析一张公共牌
+int HoldemCardTypeProb::analysisOthers_OneMore(CardList& lstCards, CardList& lstExclude, HoldemCardList& lstMine) {
+    clear();
+
+    int nums = lstCards.getCardNums();
+    if (nums < 3 || nums > 5) {
+        return 0;
+    }
+
+    if (nums == 3) {
+        return _analysisOthers_OneMore_3_foreach(lstCards, lstExclude, lstMine);
+    }
+
+    if (nums == 4) {
+        return _analysisOthers_OneMore_4_foreach(lstCards, lstExclude, lstMine);
+    }
+
+    if (nums == 5) {
+        return analysisOthers(lstCards, lstExclude, lstMine);
+    }
+
+    return 0;
+}
+
+int HoldemCardTypeProb::_analysisOthers_OneMore_3_foreach(CardList& lstCards, CardList& lstExclude, HoldemCardList& lstMine) {
+    CardList lst;
+
+    for (int suit = CARD_SUIT_SPADES; suit <= CARD_SUIT_DIAMONDS; ++suit) {
+        for (int rank = CARD_RANK_2; rank <= CARD_RANK_A; ++rank) {
+            if (!lstCards.hasCard(rank, suit) && !lstExclude.hasCard(rank, suit)) {
+                lst.addCard(rank, suit);
+            }
+        }
+    }
+
+    int winnums = 0;
+    for (int i0 = 0; i0 < lst.getCardNums() - 2; ++i0) {
+        for (int i1 = i0 + 1; i1 < lst.getCardNums() - 1; ++i1) {
+            for (int i2 = i1 + 1; i2 < lst.getCardNums(); ++i2) {
+                CardList lstguess;
+
+                lstguess.addCard(lst.getCard(i0));
+                lstguess.addCard(lst.getCard(i1));
+                lstguess.addCard(lst.getCard(i2));
+
+                HoldemCardList hcl;
+                hcl.buildWith(lstCards, lstguess);
+
+                addCardTypeNums(hcl.getCardType(), 1);
+
+                if (hcl.cmp(lstMine) > 0) {
+                    winnums++;
+                }
+            }
+        }
+    }
+
+    return winnums;
+}
+
+int HoldemCardTypeProb::_analysisOthers_OneMore_4_foreach(CardList& lstCards, CardList& lstExclude, HoldemCardList& lstMine) {
+    CardList lst;
+
+    for (int suit = CARD_SUIT_SPADES; suit <= CARD_SUIT_DIAMONDS; ++suit) {
+        for (int rank = CARD_RANK_2; rank <= CARD_RANK_A; ++rank) {
+            if (!lstCards.hasCard(rank, suit) && !lstExclude.hasCard(rank, suit)) {
+                lst.addCard(rank, suit);
+            }
+        }
+    }
+
+    int winnums = 0;
+    for (int i0 = 0; i0 < lst.getCardNums() - 2; ++i0) {
+        for (int i1 = i0 + 1; i1 < lst.getCardNums() - 1; ++i1) {
+            for (int i2 = i1 + 1; i2 < lst.getCardNums(); ++i2) {
+                CardList lstguess;
+
+                lstguess.addCard(lst.getCard(i0));
+                lstguess.addCard(lst.getCard(i1));
+                lstguess.addCard(lst.getCard(i2));
+
+                HoldemCardList hcl;
+                hcl.buildWith(lstCards, lstguess);
+
+                addCardTypeNums(hcl.getCardType(), 1);
+
+                if (hcl.cmp(lstMine) > 0) {
+                    winnums++;
+                }
             }
         }
     }

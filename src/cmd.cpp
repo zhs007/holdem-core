@@ -185,6 +185,15 @@ void cmd_analysiscardsex(Command& cmd) {
 
         printf("my win prob: %.2f\n", 100.0f * (prob.getTotalNums() - winnums) / prob.getTotalNums());
     }
+
+    {
+        printf("=======> others one more prob:\n");
+        HoldemCardTypeProb prob;
+        int winnums = prob.analysisOthers_OneMore(lstCommon, lstHand, hcl);
+        prob.output();
+
+        printf("my win prob: %.2f\n", 100.0f * (prob.getTotalNums() - winnums) / prob.getTotalNums());
+    }
 }
 
 void cmd_procrange(Command& cmd) {

@@ -30,9 +30,9 @@ void procCmdArr(const char* arr[], int len) {
 int main() {
     srand(time(NULL));
 
-    procCmdArr(CMD, 11);
+//    procCmdArr(CMD, 11);
 
-    return 0;
+//    return 0;
 
     printf("please input cmd...\n");
 

@@ -52,7 +52,10 @@ public:
 public:
     void analysisFullOthers(CardList& lstCards, CardList& lstExclude);
 
+    // 分析别人当前手牌
     int analysisOthers(CardList& lstCards, CardList& lstExclude, HoldemCardList& lstMine);
+    // 分析别人当前手牌以外，再多分析一张公共牌
+    int analysisOthers_OneMore(CardList& lstCards, CardList& lstExclude, HoldemCardList& lstMine);
 
     void analysisMe(CardList& lstHand, CardList& lstCommon, CardList& lstExclude);
 public:
@@ -71,6 +74,9 @@ protected:
     int _analysisOthers_3_foreach(CardList& lstCards, CardList& lstExclude, HoldemCardList& lstMine);
     int _analysisOthers_4_foreach(CardList& lstCards, CardList& lstExclude, HoldemCardList& lstMine);
     int _analysisOthers_5_foreach(CardList& lstCards, CardList& lstExclude, HoldemCardList& lstMine);
+
+    int _analysisOthers_OneMore_3_foreach(CardList& lstCards, CardList& lstExclude, HoldemCardList& lstMine);
+    int _analysisOthers_OneMore_4_foreach(CardList& lstCards, CardList& lstExclude, HoldemCardList& lstMine);
 
     void _analysisMe_3_foreach(CardList& lstHand, CardList& lstExclude);
     void _analysisMe_4_foreach(CardList& lstHand, CardList& lstExclude);
